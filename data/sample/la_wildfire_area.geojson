@@ -1,0 +1,33 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "note": "SAMPLE hazard polygon for demo purposes. Coordinates are real Los Angeles-area (Pacific Palisades / Topanga foothills) longitude/latitude so impact geometry math runs against a real place; the fire extent itself is illustrative, not a live detection.",
+    "hazard_type": "wildfire",
+    "status": "SIMULATED"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "HAZARD-77",
+        "severity": "HIGH",
+        "probability": 0.82,
+        "observed_at": "2026-09-09T10:30:00Z"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-118.5820, 34.0480],
+          [-118.5650, 34.0520],
+          [-118.5520, 34.0610],
+          [-118.5480, 34.0740],
+          [-118.5590, 34.0830],
+          [-118.5760, 34.0800],
+          [-118.5890, 34.0690],
+          [-118.5900, 34.0570],
+          [-118.5820, 34.0480]
+        ]]
+      }
+    }
+  ]
+}

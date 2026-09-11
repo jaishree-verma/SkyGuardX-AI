@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: nexusz
+      POSTGRES_PASSWORD: nexusz
+      POSTGRES_DB: nexusz
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexusz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ./apps/api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://nexusz:nexusz@postgres:5432/nexusz
+      REDIS_URL: redis://redis:6379/0
+      SIMULATOR_ENABLED: "true"
+      EVENT_BUS_BACKEND: "inproc"
+      # ANTHROPIC_API_KEY: set this to enable real LLM explanations; falls
+      # back to a deterministic template automatically if unset.
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      IBM_Z_INTEGRATION_ENABLED: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./apps/api:/app
+      - ./data:/data
+
+  web:
+    build:
+      context: ./apps/web
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: "http://localhost:8000"
+      VITE_WS_URL: "ws://localhost:8000/ws/events"
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

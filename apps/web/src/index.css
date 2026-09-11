@@ -1,0 +1,112 @@
+/*
+  SkyGuard-X Command Center — design tokens.
+
+  Subject: a live mission-control console for satellite operators and
+  emergency responders — not a generic SaaS dashboard. The palette and
+  typography are pulled from real telemetry-console conventions (dark field,
+  amber/teal status coding, monospace data readouts) because that's the
+  actual visual language of the room this product is modeled on, not a
+  decorative choice.
+
+  Color:
+    --bg            #0A0E14  base field, near-black navy
+    --panel         #10151F  panel surface
+    --panel-raised  #161D2B  raised/active panel
+    --border        #1E2635  hairline dividers
+    --text          #DCE4F0  primary text
+    --text-muted    #66738C  secondary/meta text
+    --amber         #FF9F1C  HIGH risk / alert
+    --gold          #F5C84C  MEDIUM risk
+    --teal          #2EC4B6  LOW risk / nominal / safe
+    --blue          #4C9AFF  action / decision / approve
+
+  Type:
+    display/labels: "Inter", system-ui  (clean grotesk, for headers/nav)
+    data/telemetry: "JetBrains Mono", ui-monospace (for all numeric readouts,
+                     event IDs, timestamps — genuinely data, not decoration)
+
+  Layout: three-column console — event stream (left) / map + cascade
+  (center) / decision & explanation (right). Left-aligned, dense, no
+  decorative whitespace; this is a working console, not a marketing page.
+*/
+
+@import url("https://cdnjs.cloudflare.com/ajax/libs/JetBrains-Mono/2.304/css/jetbrains-mono.min.css");
+
+:root {
+  --bg: #0a0e14;
+  --panel: #10151f;
+  --panel-raised: #161d2b;
+  --border: #1e2635;
+  --text: #dce4f0;
+  --text-muted: #66738c;
+  --amber: #ff9f1c;
+  --gold: #f5c84c;
+  --teal: #2ec4b6;
+  --blue: #4c9aff;
+
+  --font-ui: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--blue); color: #06090f; }
+
+a { color: var(--blue); }
+
+button {
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.status-HIGH { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.status-MEDIUM { background: var(--gold); }
+.status-LOW { background: var(--teal); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.scrollbar-thin::-webkit-scrollbar { width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--teal);
+  animation: pulse-live 1.6s ease-in-out infinite;
+  display: inline-block;
+}

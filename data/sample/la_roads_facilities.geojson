@@ -1,0 +1,44 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "note": "Real Los Angeles-area road alignments and facility locations (approximate centerlines/points, simplified for demo geometry) used so Impact Engine spatial joins run against real geography.",
+    "status": "REAL_COORDINATES_SIMPLIFIED_GEOMETRY"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "asset_id": "R-27", "type": "road", "name": "Topanga Canyon Blvd (CA-27)", "capacity_vph": 1800 },
+      "geometry": { "type": "LineString", "coordinates": [[-118.6020, 34.0330], [-118.5950, 34.0620], [-118.5900, 34.0940]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "asset_id": "R-1", "type": "road", "name": "Pacific Coast Hwy (CA-1)", "capacity_vph": 2600 },
+      "geometry": { "type": "LineString", "coordinates": [[-118.6300, 34.0350], [-118.5700, 34.0330], [-118.5100, 34.0250]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "asset_id": "R-SUNSET", "type": "road", "name": "Sunset Blvd", "capacity_vph": 1500 },
+      "geometry": { "type": "LineString", "coordinates": [[-118.5980, 34.0490], [-118.5600, 34.0500], [-118.5200, 34.0510]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "asset_id": "F-HOSP-1", "type": "hospital", "name": "UCLA Med Ctr, Santa Monica (reference point)", "capacity_beds": 264 },
+      "geometry": { "type": "Point", "coordinates": [-118.4912, 34.0195] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "asset_id": "F-FIRE-69", "type": "fire_station", "name": "LAFD Station 69 (Pacific Palisades, reference point)", "capacity_units": 3 },
+      "geometry": { "type": "Point", "coordinates": [-118.5245, 34.0430] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "asset_id": "POP-CELL-1", "type": "population_cell", "name": "Palisades Highlands (approx. residential cell)", "population": 4200 },
+      "geometry": { "type": "Point", "coordinates": [-118.5620, 34.0630] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "asset_id": "POP-CELL-2", "type": "population_cell", "name": "Topanga (approx. residential cell)", "population": 8300 },
+      "geometry": { "type": "Point", "coordinates": [-118.5980, 34.0940] }
+    }
+  ]
+}

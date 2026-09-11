@@ -1,0 +1,32 @@
+# ── Secrets ────────────────────────────────────────────────
+.env
+*.pem
+*.key
+*.cert
+
+# ── Python ─────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.db
+*.sqlite3
+nexusz_dev.db
+
+# ── Node / Frontend ─────────────────────────────────────────
+node_modules/
+apps/web/dist/
+
+# ── OS / Editor ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ── Docker volumes ───────────────────────────────────────────
+pgdata/

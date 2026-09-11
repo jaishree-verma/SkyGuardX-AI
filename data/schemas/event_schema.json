@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SkyGuard-X Canonical Event",
+  "type": "object",
+  "required": ["event_id", "event_type", "source", "entity_id", "event_time", "schema_version"],
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^evt-" },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "telemetry_anomaly",
+        "telemetry_nominal",
+        "conjunction_update",
+        "earth_hazard_wildfire",
+        "earth_hazard_flood",
+        "infrastructure_change"
+      ]
+    },
+    "source": { "type": "string" },
+    "entity_id": { "type": "string" },
+    "event_time": { "type": "string", "format": "date-time" },
+    "ingest_time": { "type": "string", "format": "date-time" },
+    "schema_version": { "type": "string", "const": "1.0" },
+    "quality": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["GOOD", "DEGRADED", "STALE", "MISSING"] },
+        "latency_ms": { "type": "number", "minimum": 0 },
+        "missing_fields": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "location": {
+      "type": ["object", "null"],
+      "properties": {
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lon": { "type": "number", "minimum": -180, "maximum": 180 }
+      }
+    },
+    "payload": { "type": "object" }
+  }
+}
