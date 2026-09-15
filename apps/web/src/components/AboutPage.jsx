@@ -108,7 +108,7 @@ export default function AboutPage({ onCheckSatellite, onOpenMonitor }) {
           border: "1px solid var(--border)",
           borderRadius: 6,
           padding: "20px 24px",
-          marginBottom: 30,
+          marginBottom: 24,
         }}
       >
         <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 10px", color: "var(--text)" }}>
@@ -119,6 +119,45 @@ export default function AboutPage({ onCheckSatellite, onOpenMonitor }) {
           In accordance with aerospace mission rules, <strong>no autonomous spacecraft maneuvering commands are executed</strong>.
           Every candidate avoidance maneuver is simulated and flagged for human operator review and sign-off.
         </p>
+      </div>
+
+      {/* Team Matrix-5 Credit Card */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, rgba(20, 28, 48, 0.9) 0%, rgba(10, 14, 22, 0.95) 100%)",
+          border: "1px solid rgba(245, 200, 76, 0.4)",
+          borderRadius: 8,
+          padding: "20px 24px",
+          marginBottom: 30,
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.5), 0 0 16px rgba(245, 200, 76, 0.15)",
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 8,
+            background: "rgba(245, 200, 76, 0.15)",
+            border: "1px solid var(--yellow)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 22,
+          }}
+        >
+          ⚡
+        </div>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 900, color: "#ffffff" }}>
+            ENGINEERED & DEVELOPED BY <span style={{ color: "var(--yellow)" }}>TEAM MATRIX-5</span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+            Submission for the <strong>IBM Z Datathon 2026</strong> · Real-Time Space-to-Earth Emergency Decision Intelligence.
+          </div>
+        </div>
       </div>
 
       {/* Quick Navigation Footer */}
