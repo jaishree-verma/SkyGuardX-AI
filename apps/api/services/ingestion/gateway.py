@@ -24,6 +24,10 @@ class DuplicateEventError(Exception):
     pass
 
 
+class MalformedEventError(Exception):
+    pass
+
+
 class EventGateway:
     """Stateful gateway: tracks seen event_ids (idempotency) and last-seen
     event_time per entity (out-of-order / late-event detection)."""
@@ -35,6 +39,12 @@ class EventGateway:
         self._last_event_time: dict[str, datetime] = {}
 
     async def ingest(self, event: CanonicalEvent) -> CanonicalEvent:
+        # 0. Validation checks
+        valid, errors = event.validate_bounds()
+        if not valid:
+            logger.warning("malformed event rejected event_id=%s errors=%s", event.event_id, errors)
+            raise MalformedEventError(f"malformed event {event.event_id}: {'; '.join(errors)}")
+
         # 1. Idempotency / duplicate detection
         if event.event_id in self._seen_ids:
             raise DuplicateEventError(f"duplicate event_id={event.event_id}")

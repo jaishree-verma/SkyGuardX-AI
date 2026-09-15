@@ -20,7 +20,12 @@ from pydantic import BaseModel, Field, field_validator
 class EventType(str, Enum):
     TELEMETRY_ANOMALY = "telemetry_anomaly"
     TELEMETRY_NOMINAL = "telemetry_nominal"
+    SATELLITE_TELEMETRY = "SATELLITE_TELEMETRY"
+    satellite_telemetry = "satellite_telemetry"
     CONJUNCTION_UPDATE = "conjunction_update"
+    CONJUNCTION_ALERT = "conjunction_alert"
+    SPACE_RISK_ALERT = "space_risk_alert"
+    SPACE_OBJECT_UPDATE = "space_object_update"
     EARTH_HAZARD_WILDFIRE = "earth_hazard_wildfire"
     EARTH_HAZARD_FLOOD = "earth_hazard_flood"
     INFRASTRUCTURE_CHANGE = "infrastructure_change"
@@ -51,17 +56,20 @@ class CanonicalEvent(BaseModel):
     event_id: str = Field(default_factory=lambda: f"evt-{uuid.uuid4().hex[:10]}")
     event_type: EventType
     source: str  # e.g. "simulator", "ground-station-1", "eo-satellite-feed"
-    entity_id: str  # e.g. "SAT-1042", "HAZARD-77"
+    entity_id: str  # e.g. "SAT-1042", "DEB-2098"
     event_time: datetime  # when the source says it happened
     ingest_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    processing_time: Optional[datetime] = None
     schema_version: str = "1.0"
     quality: DataQuality = Field(default_factory=DataQuality)
     location: Optional[GeoPoint] = None
     payload: dict[str, Any] = Field(default_factory=dict)
 
-    @field_validator("event_time", "ingest_time")
+    @field_validator("event_time", "ingest_time", "processing_time")
     @classmethod
-    def _ensure_tz(cls, v: datetime) -> datetime:
+    def _ensure_tz(cls, v: Optional[datetime]) -> Optional[datetime]:
+        if v is None:
+            return None
         if v.tzinfo is None:
             return v.replace(tzinfo=timezone.utc)
         return v
@@ -69,18 +77,80 @@ class CanonicalEvent(BaseModel):
     def age_seconds(self) -> float:
         return (datetime.now(timezone.utc) - self.event_time).total_seconds()
 
+    def validate_bounds(self) -> tuple[bool, list[str]]:
+        """Validates geographic and telemetry bounds safely without crashing."""
+        errors: list[str] = []
+        p = self.payload
+
+        # Coordinate checks
+        lat = p.get("latitude", self.location.lat if self.location else None)
+        lon = p.get("longitude", self.location.lon if self.location else None)
+        if lat is not None and not (-90.0 <= float(lat) <= 90.0):
+            errors.append(f"latitude {lat} out of range [-90, 90]")
+        if lon is not None and not (-180.0 <= float(lon) <= 180.0):
+            errors.append(f"longitude {lon} out of range [-180, 180]")
+
+        # Battery check
+        battery = p.get("battery_level")
+        if battery is not None and not (0.0 <= float(battery) <= 100.0):
+            errors.append(f"battery_level {battery} out of range [0, 100]")
+
+        # Signal check
+        signal = p.get("signal_strength")
+        if signal is not None and not (0.0 <= float(signal) <= 100.0):
+            errors.append(f"signal_strength {signal} out of range [0, 100]")
+
+        # Velocity check
+        vel = p.get("velocity_kms")
+        if vel is not None and float(vel) < 0.0:
+            errors.append(f"velocity_kms {vel} cannot be negative")
+
+        return len(errors) == 0, errors
+
 
 class RiskObject(BaseModel):
     """Output of Space Risk / Earth Risk services."""
     entity_id: str
-    risk_type: str  # "health" | "conjunction" | "wildfire" | "flood"
+    risk_type: str  # "health" | "conjunction" | "unified_space_risk"
     risk_score: float  # 0..1
     confidence: float  # 0..1
-    status: str  # "LOW" | "MEDIUM" | "HIGH"
+    status: str  # "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
     top_evidence: list[str] = Field(default_factory=list)
     model_version: str
     source_event_id: str
+    risk_contributors: Optional[dict[str, float]] = None
+    data_age_seconds: Optional[float] = None
     computed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class SpaceRiskEvent(BaseModel):
+    """Standardized Layer 1 output object ready for future Layer 2 (Earth Impact) consumption."""
+    space_event_id: str
+    entity_id: str
+    event_type: str = "SPACE_RISK"
+    risk_score: float
+    risk_level: str  # LOW | MEDIUM | HIGH | CRITICAL
+    confidence: float
+    location: dict[str, float]
+    affected_objects: list[str]
+    evidence: list[str]
+    timestamp: str
+    model_version: str = "space-risk-v1"
+    requires_human_approval: bool = True
+    autonomous_action_allowed: bool = False
+
+
+class AlertObject(BaseModel):
+    alert_id: str = Field(default_factory=lambda: f"alt-{uuid.uuid4().hex[:8]}")
+    alert_type: str  # "SPACE_RISK_ALERT" | "CONJUNCTION_ALERT"
+    severity: str  # "WARNING" | "HIGH" | "CRITICAL"
+    title: str
+    message: str
+    entity_id: str
+    secondary_entity_id: Optional[str] = None
+    risk_score: float
+    evidence: list[str] = Field(default_factory=list)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ImpactObject(BaseModel):

@@ -10,7 +10,12 @@
       "enum": [
         "telemetry_anomaly",
         "telemetry_nominal",
+        "SATELLITE_TELEMETRY",
+        "satellite_telemetry",
         "conjunction_update",
+        "conjunction_alert",
+        "space_risk_alert",
+        "space_object_update",
         "earth_hazard_wildfire",
         "earth_hazard_flood",
         "infrastructure_change"

@@ -3,22 +3,20 @@ import { useEffect, useRef, useState } from "react";
 const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8000/ws/events";
 
 /**
- * Connects to SkyGuard-X's real-time channel and keeps rolling buffers per
- * message channel (event / risk / impact / cascade / scenario_results /
- * recommendation / recommendation_decided / conjunction). Auto-reconnects
- * with backoff so a dropped connection (backend restart, network blip)
- * doesn't leave the dashboard silently stale.
+ * Real-time WebSocket hook for Layer 1 Space Intelligence.
+ * Subscribes to telemetry, space objects, risks, conjunctions, alerts, and canonical events.
  */
 export function useNexusSocket() {
   const [connected, setConnected] = useState(false);
+  const [lastEventTime, setLastEventTime] = useState(Date.now());
   const [state, setState] = useState({
     events: [],
+    satellites: {},
+    spaceObjects: [],
     risks: {},
-    impact: null,
-    cascade: null,
-    scenarioResults: null,
-    recommendations: [],
     conjunction: null,
+    conjunctions: {},
+    alerts: [],
   });
   const wsRef = useRef(null);
   const attemptRef = useRef(0);
@@ -37,43 +35,76 @@ export function useNexusSocket() {
       };
 
       ws.onmessage = (evt) => {
-        const msg = JSON.parse(evt.data);
-        setState((prev) => {
-          switch (msg.channel) {
-            case "event":
-              return { ...prev, events: [msg.payload, ...prev.events].slice(0, 100) };
-            case "risk":
-              return {
-                ...prev,
-                risks: { ...prev.risks, [msg.payload.entity_id]: msg.payload },
-              };
-            case "impact":
-              return { ...prev, impact: msg.payload };
-            case "cascade":
-              return { ...prev, cascade: msg.payload };
-            case "scenario_results":
-              return { ...prev, scenarioResults: msg.payload };
-            case "conjunction":
-              return { ...prev, conjunction: msg.payload };
-            case "recommendation":
-              return { ...prev, recommendations: [msg.payload, ...prev.recommendations].slice(0, 20) };
-            case "recommendation_decided":
-              return {
-                ...prev,
-                recommendations: prev.recommendations.map((r) =>
-                  r.recommendation_id === msg.payload.recommendation_id ? msg.payload : r
-                ),
-              };
-            default:
-              return prev;
-          }
-        });
+        try {
+          const msg = JSON.parse(evt.data);
+          setLastEventTime(Date.now());
+
+          setState((prev) => {
+            switch (msg.channel) {
+              case "telemetry": {
+                const sat = msg.payload;
+                return {
+                  ...prev,
+                  satellites: {
+                    ...prev.satellites,
+                    [sat.satellite_id]: sat,
+                  },
+                };
+              }
+              case "space_objects": {
+                return {
+                  ...prev,
+                  spaceObjects: msg.payload,
+                };
+              }
+              case "event": {
+                return {
+                  ...prev,
+                  events: [msg.payload, ...prev.events].slice(0, 100),
+                };
+              }
+              case "risk": {
+                const r = msg.payload;
+                return {
+                  ...prev,
+                  risks: {
+                    ...prev.risks,
+                    [r.entity_id]: r,
+                  },
+                };
+              }
+              case "conjunction": {
+                const c = msg.payload;
+                const pairKey = `${c.object_a}::${c.object_b}`;
+                return {
+                  ...prev,
+                  conjunction: c,
+                  conjunctions: {
+                    ...prev.conjunctions,
+                    [pairKey]: c,
+                  },
+                };
+              }
+              case "alert": {
+                const alert = msg.payload;
+                return {
+                  ...prev,
+                  alerts: [alert, ...prev.alerts.filter((a) => a.alert_id !== alert.alert_id)].slice(0, 20),
+                };
+              }
+              default:
+                return prev;
+            }
+          });
+        } catch (e) {
+          console.error("Failed to parse WS message:", e);
+        }
       };
 
       ws.onclose = () => {
         if (cancelled) return;
         setConnected(false);
-        const delay = Math.min(1000 * 2 ** attemptRef.current, 10000);
+        const delay = Math.min(1000 * 2 ** attemptRef.current, 8000);
         attemptRef.current += 1;
         setTimeout(connect, delay);
       };
@@ -88,5 +119,5 @@ export function useNexusSocket() {
     };
   }, []);
 
-  return { connected, ...state };
+  return { connected, lastEventTime, ...state };
 }

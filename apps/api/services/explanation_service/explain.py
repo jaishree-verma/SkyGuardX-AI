@@ -107,16 +107,17 @@ def generate_explanation(evidence: dict) -> dict:
         return {"text": _deterministic_fallback(evidence), "mode": "template", "model": None}
 
     try:
-        import google.generativeai as genai  # local import: optional dependency
+        from google import genai  # local import: new google-genai SDK
+        from google.genai import types as genai_types
 
-        genai.configure(api_key=settings.gemini_api_key)
-        model = genai.GenerativeModel(
-            model_name=settings.explanation_model,
-            system_instruction=SYSTEM_PROMPT,
-        )
-        response = model.generate_content(
-            json.dumps(evidence),
-            generation_config=genai.types.GenerationConfig(max_output_tokens=400),
+        client = genai.Client(api_key=settings.gemini_api_key)
+        response = client.models.generate_content(
+            model=settings.explanation_model,
+            contents=json.dumps(evidence),
+            config=genai_types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                max_output_tokens=400,
+            ),
         )
         text = response.text.strip()
         return {"text": text, "mode": "llm", "model": settings.explanation_model}

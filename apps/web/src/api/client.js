@@ -15,21 +15,18 @@ async function request(path, options = {}) {
 export const api = {
   health: () => request("/api/v1/health"),
   events: (since) => request(`/api/v1/events${since ? `?since=${since}` : ""}`),
-  hazards: () => request("/api/v1/hazards"),
-  impacts: (hazardId) => request(`/api/v1/impacts/${hazardId}`),
+  satellites: () => request("/api/v1/satellites"),
+  satellite: (id) => request(`/api/v1/satellites/${id}`),
+  satellitePosition: (id) => request(`/api/v1/satellites/${id}/position`),
+  satelliteTelemetry: (id) => request(`/api/v1/satellites/${id}/telemetry`),
+  satelliteHealth: (id) => request(`/api/v1/satellites/${id}/health`),
+  spaceObjects: () => request("/api/v1/space-objects"),
   conjunctions: () => request("/api/v1/conjunctions"),
-  generateRecommendation: () =>
-    request("/api/v1/recommendations/generate", { method: "POST" }),
-  approveRecommendation: (recId, approver, decision, notes) =>
-    request(`/api/v1/recommendations/${recId}/approve`, {
-      method: "POST",
-      body: JSON.stringify({ approver, decision, notes }),
-    }),
-  runScenario: (scenarioId, body) =>
-    request(`/api/v1/scenarios/${scenarioId}/run`, {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
+  risks: () => request("/api/v1/risks"),
+  alerts: () => request("/api/v1/alerts"),
+  modelEvaluation: () => request("/api/v1/model-evaluation"),
+  startDemo: () => request("/api/v1/demo/start", { method: "POST" }),
+  resetDemo: () => request("/api/v1/demo/reset", { method: "POST" }),
 };
 
 export { BASE_URL };

@@ -28,9 +28,15 @@ from core.eventbus import get_event_bus
 from core.websocket_manager import manager
 from db.database import init_db, SessionLocal
 from db.models import Recommendation, AuditRecord
-from services.ingestion.gateway import EventGateway, DuplicateEventError, TOPIC_RAW_EVENTS
+from services.ingestion.gateway import EventGateway, DuplicateEventError, MalformedEventError, TOPIC_RAW_EVENTS
 from services.space_risk import anomaly as space_anomaly
 from services.space_risk import conjunction as space_conjunction
+from services.space_risk.conjunction import calculate_spatial_proximity
+from services.space_risk.tracker import tracker
+from services.space_risk.risk_engine import calculate_unified_risk
+from services.space_risk.alerts import alert_manager
+from services.space_risk.simulator import SpaceSimulator, demo_controller
+from services.space_risk.anomaly import evaluate_model
 from services.space_risk.tle_data import load_sample_tle, load_active_tle
 from services.earth_risk import hazard as earth_hazard
 from services.earth_risk import live_hazard_feed
@@ -40,8 +46,7 @@ from services.cascade_engine.cascade import build_wildfire_cascade_graph, propag
 from services.scenario_engine import whatif
 from services.decision_engine import decision as decision_engine
 from services.explanation_service import explain as explanation_service
-from simulator.event_simulator import run_simulator
-from infra_ibm_z_adapter import transactional_score  # simulated IBM Z boundary adapter
+from infra_ibm_z_adapter import boundary, transactional_score  # IBM Z boundary adapter
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("SkyGuard-X.main")
@@ -50,9 +55,10 @@ settings = get_settings()
 bus = get_event_bus()
 gateway = EventGateway(bus)
 
-# In-memory "latest state" caches (in production these are DB-backed reads;
-# kept in-memory here for a fast, dependency-light demo).
+# In-memory "latest state" caches
 LATEST_RISK: dict[str, RiskObject] = {}
+LATEST_SPACE_RISK: dict[str, dict] = {}
+LATEST_CONJUNCTIONS: dict[str, dict] = {}
 LATEST_HAZARD_RECORD: dict | None = None
 LATEST_IMPACT: dict | None = None
 RECOMMENDATIONS: dict[str, dict] = {}
@@ -93,49 +99,145 @@ app.add_middleware(
 
 
 # ---------------------------------------------------------------------------
-# Core decision-loop pipeline: this is the function that runs steps 2-8 of
-# the spec's 8-step loop every time a canonical event arrives.
+# Core decision-loop pipeline: Layer 1 Space Intelligence
 # ---------------------------------------------------------------------------
 async def process_event(event: CanonicalEvent) -> None:
     t0 = time.perf_counter()
+    event.processing_time = datetime.now(timezone.utc)
     await manager.broadcast("event", event.model_dump())
 
-    if event.event_type in (EventType.TELEMETRY_ANOMALY, EventType.TELEMETRY_NOMINAL):
-        # STEP 2-3: AI detection + risk prediction (with the simulated IBM Z
-        # transactional boundary in front of the model call — see
-        # infra_ibm_z_adapter.py / infra/ibm_z/README_IBM_Z_INTEGRATION.md).
-        risk = await transactional_score(lambda: space_anomaly.score_telemetry(event))
-        LATEST_RISK[event.entity_id] = risk
-        await manager.broadcast("risk", risk.model_dump())
+    if event.event_type in (
+        EventType.TELEMETRY_ANOMALY,
+        EventType.TELEMETRY_NOMINAL,
+        EventType.SATELLITE_TELEMETRY,
+        EventType.satellite_telemetry,
+    ):
+        # 1. Update Space Tracking Service
+        sat_state = tracker.register_or_update_satellite(event.payload, event.event_time)
 
-        if risk.status in ("MEDIUM", "HIGH"):
-            await _run_conjunction_check(event.entity_id, risk)
+        # 2. AI Anomaly Detection through IBM Z boundary
+        telemetry_risk = await transactional_score(lambda: space_anomaly.score_telemetry(event))
+        LATEST_RISK[event.entity_id] = telemetry_risk
+
+        # 3. Spatial Conjunction Proximity with active debris objects
+        conj_risk_obj = None
+        for deb in tracker._debris.values():
+            conj_res = calculate_spatial_proximity(
+                {"satellite_id": sat_state.satellite_id, "latitude": sat_state.latitude, "longitude": sat_state.longitude, "altitude_km": sat_state.altitude_km},
+                {"object_id": deb.object_id, "latitude": deb.latitude, "longitude": deb.longitude, "altitude_km": deb.altitude_km},
+                tca_minutes=18.0,
+            )
+            key = f"{sat_state.satellite_id}::{deb.object_id}"
+            conj_dict = {
+                "conjunction_id": conj_res.conjunction_id,
+                "object_a": conj_res.object_a,
+                "object_b": conj_res.object_b,
+                "miss_distance_km": conj_res.miss_distance_km,
+                "time_to_closest_approach_minutes": conj_res.time_to_closest_approach_minutes,
+                "risk_score": conj_res.risk_score,
+                "risk_level": conj_res.risk_level,
+                "confidence": conj_res.confidence,
+                "candidate_maneuvers": conj_res.candidate_maneuvers,
+                "evidence": conj_res.evidence,
+                "tca_utc": conj_res.tca_utc.isoformat(),
+            }
+            LATEST_CONJUNCTIONS[key] = conj_dict
+
+            # Check if this conjunction warrants an alert
+            c_alert = alert_manager.evaluate_conjunction_alert(
+                object_a=conj_res.object_a,
+                object_b=conj_res.object_b,
+                miss_distance_km=conj_res.miss_distance_km,
+                risk_score=conj_res.risk_score,
+                risk_level=conj_res.risk_level,
+                tca_minutes=conj_res.time_to_closest_approach_minutes,
+            )
+            if c_alert:
+                await manager.broadcast("alert", c_alert.model_dump())
+
+            if deb.object_id == "DEB-2098" or conj_res.risk_score > (conj_risk_obj.risk_score if conj_risk_obj else 0.0):
+                conj_risk_obj = RiskObject(
+                    entity_id=sat_state.satellite_id,
+                    risk_type="conjunction",
+                    risk_score=conj_res.risk_score,
+                    confidence=conj_res.confidence,
+                    status=conj_res.risk_level,
+                    top_evidence=conj_res.evidence,
+                    model_version="conjunction-v1",
+                    source_event_id=event.event_id,
+                )
+                await manager.broadcast("conjunction", conj_dict)
+
+        # 4. Unified Space Risk Engine
+        unified_risk = calculate_unified_risk(
+            entity_id=sat_state.satellite_id,
+            telemetry_risk=telemetry_risk,
+            health_score=sat_state.health_score,
+            health_evidence=sat_state.health_evidence,
+            conjunction_risk=conj_risk_obj,
+            location={"latitude": sat_state.latitude, "longitude": sat_state.longitude},
+            data_age_seconds=event.age_seconds(),
+        )
+        LATEST_SPACE_RISK[sat_state.satellite_id] = unified_risk
+        await boundary.dispatch_space_risk(unified_risk)
+
+        # 5. Evaluate Space Risk Alert
+        r_alert = alert_manager.evaluate_space_risk_alert(
+            entity_id=sat_state.satellite_id,
+            current_status=unified_risk["status"],
+            risk_score=unified_risk["risk_score"],
+            evidence=unified_risk["top_evidence"],
+        )
+        if r_alert:
+            await manager.broadcast("alert", r_alert.model_dump())
+
+        # 6. Real-Time Broadcasts to Command Center
+        await manager.broadcast("telemetry", sat_state.to_dict())
+        await manager.broadcast("risk", unified_risk)
+        await manager.broadcast("space_objects", tracker.list_space_objects())
+
+    elif event.event_type == EventType.SPACE_OBJECT_UPDATE:
+        deb_state = tracker.register_or_update_debris(event.payload, event.event_time)
+        for sat in tracker._satellites.values():
+            conj_res = calculate_spatial_proximity(
+                {"satellite_id": sat.satellite_id, "latitude": sat.latitude, "longitude": sat.longitude, "altitude_km": sat.altitude_km},
+                {"object_id": deb_state.object_id, "latitude": deb_state.latitude, "longitude": deb_state.longitude, "altitude_km": deb_state.altitude_km},
+                tca_minutes=18.0,
+            )
+            key = f"{sat.satellite_id}::{deb_state.object_id}"
+            conj_dict = {
+                "conjunction_id": conj_res.conjunction_id,
+                "object_a": conj_res.object_a,
+                "object_b": conj_res.object_b,
+                "miss_distance_km": conj_res.miss_distance_km,
+                "time_to_closest_approach_minutes": conj_res.time_to_closest_approach_minutes,
+                "risk_score": conj_res.risk_score,
+                "risk_level": conj_res.risk_level,
+                "confidence": conj_res.confidence,
+                "candidate_maneuvers": conj_res.candidate_maneuvers,
+                "evidence": conj_res.evidence,
+                "tca_utc": conj_res.tca_utc.isoformat(),
+            }
+            LATEST_CONJUNCTIONS[key] = conj_dict
+            if conj_res.risk_score >= 0.5:
+                c_alert = alert_manager.evaluate_conjunction_alert(
+                    satellite_id=sat.satellite_id,
+                    secondary_id=deb_state.object_id,
+                    miss_distance_km=conj_res.miss_distance_km,
+                    risk_score=conj_res.risk_score,
+                    risk_level=conj_res.risk_level,
+                    tca_minutes=conj_res.time_to_closest_approach_minutes,
+                )
+                if c_alert:
+                    await manager.broadcast("alert", c_alert.model_dump())
+                await manager.broadcast("conjunction", conj_dict)
+
+        await manager.broadcast("space_objects", tracker.list_space_objects())
 
     elif event.event_type == EventType.EARTH_HAZARD_WILDFIRE:
         await _run_earth_hazard_pipeline(event)
 
-    logger.info("processed event %s (%s) in %.1fms", event.event_id, event.event_type, (time.perf_counter() - t0) * 1000)
-
-
-async def _run_conjunction_check(entity_id: str, health_risk: RiskObject) -> None:
-    """STEP 3 continued: space collision risk, run opportunistically whenever
-    a satellite shows elevated health risk (a degraded satellite is also more
-    conjunction-relevant to watch closely)."""
-    if len(TLE_OBJECTS) < 2:
-        return
-    primary, secondary = TLE_OBJECTS[0], TLE_OBJECTS[1]
-    try:
-        result = space_conjunction.find_closest_approach(primary, secondary)
-        risk_obj = space_conjunction.to_risk_object(result, source_event_id=health_risk.source_event_id)
-        LATEST_RISK[f"{entity_id}::conjunction"] = risk_obj
-        await manager.broadcast("conjunction", {
-            "tca_utc": result.tca_utc.isoformat(),
-            "miss_distance_km": result.miss_distance_km,
-            "risk": risk_obj.model_dump(),
-            "candidate_maneuvers": result.candidate_maneuvers,
-        })
-    except Exception as exc:
-        logger.warning("conjunction check failed: %s", exc)
+    logger.debug("processed event %s in %.1fms", event.event_id, (time.perf_counter() - t0) * 1000)
 
 
 async def _run_earth_hazard_pipeline(event: CanonicalEvent) -> None:
@@ -262,7 +364,7 @@ async def on_startup() -> None:
         LIVE_ASSETS = None  # impact_engine.compute_impact() falls back to bundled sample
         DATA_SOURCES["roads_facilities_population"] = "sample_fallback"
 
-    asyncio.create_task(run_simulator(gateway))
+    asyncio.create_task(SpaceSimulator(gateway).start())
     logger.info(
         "SkyGuard-X API started (env=%s, ibm_z_integration_enabled=%s) | data sources: %s",
         settings.environment, settings.ibm_z_integration_enabled, DATA_SOURCES,
@@ -270,7 +372,7 @@ async def on_startup() -> None:
 
 
 # ---------------------------------------------------------------------------
-# REST API — spec §7.9
+# REST API — Layer 1 Space Intelligence & Platform
 # ---------------------------------------------------------------------------
 class IngestEventRequest(BaseModel):
     event_type: EventType
@@ -282,41 +384,33 @@ class IngestEventRequest(BaseModel):
 
 @app.get("/api/v1/health")
 async def health():
-    return {"status": "ok", "service": "SkyGuard-X-api", "time": datetime.now(timezone.utc).isoformat()}
+    return {
+        "status": "ok",
+        "service": "SkyGuard-X-api",
+        "layer": "LAYER_1_SPACE_INTELLIGENCE",
+        "tracked_satellites": len(tracker.list_satellites()),
+        "tracked_space_objects": len(tracker.list_space_objects()),
+        "active_alerts": len(alert_manager.list_alerts()),
+        "time": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 @app.get("/api/v1/data-sources")
 async def data_sources():
-    """Answers, precisely and at runtime, "which datasets is this actually
-    using right now": live (Celestrak / NWS / OpenStreetMap) or offline
-    sample fallback, per data channel. This is the fail-safe-behaviour /
-    reproducibility transparency the spec requires (§8.3)."""
+    """Answers runtime status of data acquisition sources."""
     return {
         "sources": DATA_SOURCES,
         "tracked_objects": [{"name": o.name, "norad_id": o.norad_id} for o in TLE_OBJECTS],
         "live_asset_count": len(LIVE_ASSETS) if LIVE_ASSETS else 0,
         "notes": {
-            "satellite_telemetry": (
-                "Always simulated: no real satellite publishes live internal health "
-                "telemetry publicly (proprietary mission-control data). Orbital "
-                "position (TLE) IS fetched live when reachable."
-            ),
-            "sandbox_note": (
-                "If all sources read 'sample_fallback', outbound network to "
-                "celestrak.org / api.weather.gov / overpass-api.de was not reachable "
-                "from wherever this instance is running — check your network/firewall. "
-                "The fetch code itself is real; see services/*/live_*.py."
-            ),
+            "satellite_telemetry": "Simulated continuous multi-satellite telemetry generator with realistic Gaussian noise.",
+            "satellite_orbital_elements": "Celestrak live TLE with fallback to bundled offline sample.",
         },
     }
 
 
 @app.post("/api/v1/data-sources/refresh")
 async def refresh_data_sources():
-    """Manually re-trigger the live-data acquisition startup did automatically.
-    Useful for a live demo: click this right before presenting to pull the
-    freshest TLEs/alerts/OSM data rather than relying on whatever was live at
-    container-start time."""
     await on_startup()
     return DATA_SOURCES
 
@@ -340,20 +434,102 @@ async def ingest_event(req: IngestEventRequest):
         await gateway.ingest(event)
     except DuplicateEventError as exc:
         raise HTTPException(status_code=409, detail=str(exc))
+    except MalformedEventError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
     return event.model_dump()
 
 
+# --- Layer 1: Satellite Tracking & Telemetry Endpoints ---
+@app.get("/api/v1/satellites")
+async def get_satellites():
+    return tracker.list_satellites()
+
+
+@app.get("/api/v1/satellites/{satellite_id}")
+async def get_satellite(satellite_id: str):
+    sat = tracker.get_satellite(satellite_id)
+    if not sat:
+        raise HTTPException(status_code=404, detail=f"satellite {satellite_id} not found")
+    return sat.to_dict()
+
+
+@app.get("/api/v1/satellites/{satellite_id}/position")
+async def get_satellite_position(satellite_id: str):
+    sat = tracker.get_satellite(satellite_id)
+    if not sat:
+        raise HTTPException(status_code=404, detail=f"satellite {satellite_id} not found")
+    return sat.position_dict()
+
+
+@app.get("/api/v1/satellites/{satellite_id}/telemetry")
+async def get_satellite_telemetry(satellite_id: str):
+    sat = tracker.get_satellite(satellite_id)
+    history = tracker.get_satellite_history(satellite_id)
+    return {
+        "satellite_id": satellite_id,
+        "current": sat.to_dict() if sat else None,
+        "history": history,
+    }
+
+
 @app.get("/api/v1/satellites/{satellite_id}/health")
-async def satellite_health(satellite_id: str):
+async def get_satellite_health(satellite_id: str):
+    sat = tracker.get_satellite(satellite_id)
+    if sat:
+        return sat.health_dict()
     risk = LATEST_RISK.get(satellite_id)
-    if not risk:
-        raise HTTPException(status_code=404, detail="no health data yet for this satellite")
-    return risk.model_dump()
+    if risk:
+        return risk.model_dump()
+    raise HTTPException(status_code=404, detail=f"no health data for {satellite_id}")
+
+
+@app.get("/api/v1/space-objects")
+async def get_space_objects():
+    return tracker.list_space_objects()
 
 
 @app.get("/api/v1/conjunctions")
-async def conjunctions():
-    return {k: v.model_dump() for k, v in LATEST_RISK.items() if v.risk_type == "conjunction"}
+async def get_conjunctions():
+    if LATEST_CONJUNCTIONS:
+        return list(LATEST_CONJUNCTIONS.values())
+    return [v.model_dump() for k, v in LATEST_RISK.items() if v.risk_type == "conjunction"]
+
+
+@app.get("/api/v1/risks")
+async def get_risks():
+    return {
+        "space_risks": LATEST_SPACE_RISK,
+        "raw_telemetry_risks": {k: v.model_dump() for k, v in LATEST_RISK.items()},
+    }
+
+
+@app.get("/api/v1/alerts")
+async def get_alerts():
+    return alert_manager.list_alerts()
+
+
+@app.get("/api/v1/model-evaluation")
+async def get_model_evaluation():
+    return evaluate_model()
+
+
+@app.post("/api/v1/demo/start")
+async def start_demo():
+    demo_controller.start()
+    return {
+        "status": "started",
+        "message": "Deterministic demo scenario initialized: SAT-1042 anomaly progression + DEB-2098 close approach",
+    }
+
+
+@app.post("/api/v1/demo/reset")
+async def reset_demo():
+    demo_controller.reset()
+    alert_manager.clear()
+    return {
+        "status": "reset",
+        "message": "Demo scenario reset to nominal fleet monitoring",
+    }
 
 
 @app.get("/api/v1/hazards")
