@@ -35,34 +35,44 @@ export default function SpaceRocketHero3D({
     renderer.setClearColor(0x000000, 0); // Transparent so photo shows through
     container.appendChild(renderer.domElement);
 
-    // 1. 3D Stars / Space Debris Particles
-    const starCount = 1400;
+    // 1. 3D Stars / Space Debris Particles (Soft, sparkling, and cleared from center text)
+    const starCount = 1100;
     const starGeometry = new THREE.BufferGeometry();
     const starPositions = new Float32Array(starCount * 3);
     const starColors = new Float32Array(starCount * 3);
 
     for (let i = 0; i < starCount; i++) {
-      starPositions[i * 3] = (Math.random() - 0.5) * 300;
-      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 200;
-      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 250;
+      let x = (Math.random() - 0.5) * 320;
+      let y = (Math.random() - 0.5) * 220;
+      let z = (Math.random() - 0.5) * 200 - 20;
+
+      // Keep particles slightly away from the exact center to keep headline crystal clear
+      if (Math.abs(x) < 45 && Math.abs(y) < 30) {
+        x += (x >= 0 ? 50 : -50);
+        y += (y >= 0 ? 35 : -35);
+      }
+
+      starPositions[i * 3] = x;
+      starPositions[i * 3 + 1] = y;
+      starPositions[i * 3 + 2] = z;
 
       // Color variation: white, cyan/blue, warm yellow/gold
       const rVal = Math.random();
-      if (rVal > 0.8) {
-        // Yellow/Gold accent
-        starColors[i * 3] = 0.96;
-        starColors[i * 3 + 1] = 0.78;
-        starColors[i * 3 + 2] = 0.3;
-      } else if (rVal > 0.4) {
-        // Blue/Cyan tech accent
-        starColors[i * 3] = 0.35;
-        starColors[i * 3 + 1] = 0.65;
+      if (rVal > 0.85) {
+        // Soft Yellow/Gold accent
+        starColors[i * 3] = 0.98;
+        starColors[i * 3 + 1] = 0.82;
+        starColors[i * 3 + 2] = 0.35;
+      } else if (rVal > 0.45) {
+        // Tech Blue accent
+        starColors[i * 3] = 0.4;
+        starColors[i * 3 + 1] = 0.7;
         starColors[i * 3 + 2] = 1.0;
       } else {
-        // Star white
-        starColors[i * 3] = 0.9;
+        // Soft white star
+        starColors[i * 3] = 0.88;
         starColors[i * 3 + 1] = 0.92;
-        starColors[i * 3 + 2] = 1.0;
+        starColors[i * 3 + 2] = 0.98;
       }
     }
 
@@ -70,10 +80,10 @@ export default function SpaceRocketHero3D({
     starGeometry.setAttribute("color", new THREE.BufferAttribute(starColors, 3));
 
     const starMaterial = new THREE.PointsMaterial({
-      size: 1.4,
+      size: 0.85,
       vertexColors: true,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.75,
       blending: THREE.AdditiveBlending,
     });
 

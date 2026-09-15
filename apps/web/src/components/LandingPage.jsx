@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import GlossaryTooltip from "./GlossaryTooltip.jsx";
 import SpaceRocketHero3D from "./SpaceRocketHero3D.jsx";
+import AppFooter from "./AppFooter.jsx";
 
 export default function LandingPage({
   onCheckSatellite,
@@ -1176,70 +1177,13 @@ export default function LandingPage({
       </section>
 
       {/* ========================================================================= */}
-      {/* SECTION 16: FOOTER */}
+      {/* SECTION 16: COMPREHENSIVE COMMAND CENTER FOOTER */}
       {/* ========================================================================= */}
-      <footer
-        style={{
-          background: "var(--panel)",
-          borderTop: "1px solid var(--border)",
-          padding: "40px 24px 30px",
-          marginTop: "auto",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1080,
-            margin: "0 auto",
-            display: "flex",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 24,
-            fontSize: 12,
-            fontFamily: "var(--font-mono)",
-            color: "var(--text-muted)",
-          }}
-        >
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", marginBottom: 4 }}>
-              🛰 SKYGUARD XAI
-            </div>
-            <div>Real-Time Space Intelligence · Layer 1</div>
-            <div style={{ marginTop: 6, fontSize: 11 }}>IBM Z Datathon Project</div>
-          </div>
-
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ fontWeight: 700, color: "var(--text)" }}>NAVIGATION</span>
-              <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 0, textAlign: "left", fontSize: 12 }}>Home</button>
-              <button onClick={() => scrollToSection("how-it-works")} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 0, textAlign: "left", fontSize: 12 }}>How It Works</button>
-              <button onClick={() => onCheckSatellite("SAT-1042")} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 0, textAlign: "left", fontSize: 12 }}>Check Satellite</button>
-              <button onClick={onOpenMonitor} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 0, textAlign: "left", fontSize: 12 }}>Live Monitor</button>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ fontWeight: 700, color: "var(--text)" }}>TECHNOLOGY</span>
-              <span>Isolation Forest ML</span>
-              <span>3D Conjunction Geometry</span>
-              <span>Explainable AI (XAI)</span>
-              <span>IBM Z Transactional Adapter</span>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            maxWidth: 1080,
-            margin: "24px auto 0",
-            paddingTop: 16,
-            borderTop: "1px solid var(--border)",
-            fontSize: 11,
-            color: "var(--text-muted)",
-            textAlign: "center",
-          }}
-        >
-          Decision-support prototype for demonstration and research purposes. Not an operational spacecraft control system.
-        </div>
-      </footer>
+      <AppFooter
+        onNavigate={onNavigateView}
+        onCheckSatellite={onCheckSatellite}
+        onOpenMonitor={onOpenMonitor}
+      />
     </div>
   );
 }
