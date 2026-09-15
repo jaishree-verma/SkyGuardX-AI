@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import GlossaryTooltip from "./GlossaryTooltip.jsx";
+import SpaceRocketHero3D from "./SpaceRocketHero3D.jsx";
 
 export default function LandingPage({
   onCheckSatellite,
@@ -45,144 +46,18 @@ export default function LandingPage({
       className="scrollbar-thin"
     >
       {/* ========================================================================= */}
-      {/* SECTION 1: HERO SECTION */}
+      {/* SECTION 1: 3D SPACE ROCKET HERO SECTION */}
       {/* ========================================================================= */}
-      <section
-        style={{
-          padding: "70px 24px 60px",
-          maxWidth: 1080,
-          margin: "0 auto",
-          width: "100%",
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          position: "relative",
-        }}
-      >
-        {/* Live System Indicator */}
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "6px 16px",
-            background: "rgba(16, 21, 31, 0.9)",
-            border: "1px solid var(--border)",
-            borderRadius: 24,
-            fontSize: 11,
-            fontFamily: "var(--font-mono)",
-            color: "var(--text-muted)",
-            marginBottom: 24,
-            backdropFilter: "blur(6px)",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
-          }}
-        >
-          <span className="live-dot" />
-          <span style={{ color: connected ? "var(--teal)" : "var(--amber)", fontWeight: 700 }}>
-            {connected ? "SPACE INTELLIGENCE ONLINE" : "OFFLINE REPLAY"}
-          </span>
-          <span>·</span>
-          <span>Satellites: <strong style={{ color: "var(--text)" }}>{satCount}</strong></span>
-          <span>·</span>
-          <span>Debris Tracked: <strong style={{ color: "var(--text)" }}>{debrisCount}</strong></span>
-          <span>·</span>
-          <span>Active Alerts: <strong style={{ color: "#e63946" }}>{alertsCount}</strong></span>
-          <span>·</span>
-          <span style={{ color: "var(--teal)" }}>Age: {eventAgeSec}s</span>
-          <span>·</span>
-          <span style={{ fontSize: 9.5, opacity: 0.75 }}>[SIMULATED LIVE DATA]</span>
-        </div>
-
-        {/* Main Hero Headings */}
-        <h1
-          style={{
-            fontSize: "clamp(34px, 5.5vw, 56px)",
-            fontWeight: 900,
-            letterSpacing: "-0.03em",
-            lineHeight: 1.1,
-            margin: "0 0 12px",
-            color: "var(--text)",
-          }}
-        >
-          REAL-TIME SPACE INTELLIGENCE
-        </h1>
-
-        <div
-          style={{
-            fontSize: "clamp(20px, 3.2vw, 28px)",
-            fontWeight: 700,
-            color: "var(--blue)",
-            letterSpacing: "-0.01em",
-            marginBottom: 20,
-          }}
-        >
-          Before Risk Becomes Impact.
-        </div>
-
-        <p
-          style={{
-            fontSize: "clamp(15px, 2vw, 17px)",
-            color: "var(--text-muted)",
-            maxWidth: 720,
-            lineHeight: 1.6,
-            margin: "0 0 34px",
-          }}
-        >
-          SKYGUARD XAI transforms live satellite telemetry and space-object data into explainable AI
-          risk intelligence — helping operators detect anomalies, understand threats, and act before critical
-          situations escalate.
-        </p>
-
-        {/* Action Buttons */}
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginBottom: 36 }}>
-          <button
-            onClick={() => onCheckSatellite("SAT-1042")}
-            className="cta-button glow-teal"
-            style={{ padding: "14px 32px", fontSize: 14 }}
-          >
-            <span>🔍</span>
-            <span>CHECK LIVE SATELLITE</span>
-          </button>
-
-          <button
-            onClick={() => scrollToSection("how-it-works")}
-            style={{
-              background: "var(--panel-raised)",
-              color: "var(--text)",
-              border: "1px solid var(--border)",
-              fontWeight: 600,
-              fontSize: 13,
-              padding: "13px 24px",
-              borderRadius: 6,
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span>↓</span>
-            <span>EXPLORE HOW IT WORKS</span>
-          </button>
-        </div>
-
-        {/* Subtle quick launcher chips */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", marginRight: 4 }}>
-            DIRECT QUERY:
-          </span>
-          <button onClick={() => onCheckSatellite("SAT-1042")} className="chip-btn" style={{ borderLeft: "3px solid #e63946" }}>
-            <span>🚨 SAT-1042 (HIGH RISK)</span>
-          </button>
-          <button onClick={() => onCheckSatellite("SAT-1001")} className="chip-btn" style={{ borderLeft: "3px solid #2ec4b6" }}>
-            <span>🟢 SAT-1001 (NORMAL)</span>
-          </button>
-          <button onClick={() => onCheckSatellite("SAT-1003")} className="chip-btn" style={{ borderLeft: "3px solid #f5c84c" }}>
-            <span>🟡 SAT-1003 (WARNING)</span>
-          </button>
-        </div>
-      </section>
+      <SpaceRocketHero3D
+        onCheckSatellite={onCheckSatellite}
+        onExploreHowItWorks={() => scrollToSection("how-it-works")}
+        onQuickQuery={(id) => onCheckSatellite(id)}
+        satCount={satCount}
+        debrisCount={debrisCount}
+        connected={connected}
+        lastEventTime={lastEventTime}
+        alertsCount={alertsCount}
+      />
 
       {/* ========================================================================= */}
       {/* SECTION 2: LIVE SYSTEM PREVIEW */}
