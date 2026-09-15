@@ -1,4 +1,4 @@
-# SkyGuard-X — Real-Time Space-to-Earth Decision Intelligence
+# SkyGuard-X: Real-Time Space-to-Earth Decision Intelligence
 
 IBM Z Datathon prototype. Turns live satellite, orbital and Earth-hazard events into a
 ranked, explainable, human-approved action — end to end, in real time.
