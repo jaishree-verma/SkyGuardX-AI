@@ -1,58 +1,60 @@
 /*
-  SkyGuard-X Command Center — design tokens.
-
-  Subject: a live mission-control console for satellite operators and
-  emergency responders — not a generic SaaS dashboard. The palette and
-  typography are pulled from real telemetry-console conventions (dark field,
-  amber/teal status coding, monospace data readouts) because that's the
-  actual visual language of the room this product is modeled on, not a
-  decorative choice.
-
-  Color:
-    --bg            #0A0E14  base field, near-black navy
-    --panel         #10151F  panel surface
-    --panel-raised  #161D2B  raised/active panel
-    --border        #1E2635  hairline dividers
-    --text          #DCE4F0  primary text
-    --text-muted    #66738C  secondary/meta text
-    --amber         #FF9F1C  HIGH risk / alert
-    --gold          #F5C84C  MEDIUM risk
-    --teal          #2EC4B6  LOW risk / nominal / safe
-    --blue          #4C9AFF  action / decision / approve
-
-  Type:
-    display/labels: "Inter", system-ui  (clean grotesk, for headers/nav)
-    data/telemetry: "JetBrains Mono", ui-monospace (for all numeric readouts,
-                     event IDs, timestamps — genuinely data, not decoration)
-
-  Layout: three-column console — event stream (left) / map + cascade
-  (center) / decision & explanation (right). Left-aligned, dense, no
-  decorative whitespace; this is a working console, not a marketing page.
+  SkyGuard-X Command Center — Design Tokens & Dynamic UI Styles.
+  Foundation: Black
+  Highlights & Actions: Yellow
+  Alerts & Danger: Red
+  Information & Technology: Blue
 */
 
 @import url("https://cdnjs.cloudflare.com/ajax/libs/JetBrains-Mono/2.304/css/jetbrains-mono.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --bg: #0a0e14;
-  --panel: #10151f;
-  --panel-raised: #161d2b;
-  --border: #1e2635;
-  --text: #dce4f0;
-  --text-muted: #66738c;
-  --amber: #ff9f1c;
+  /* Black Foundation */
+  --bg: #06090e;
+  --panel: #0d121c;
+  --panel-raised: #141c2b;
+  --panel-glass: rgba(13, 18, 28, 0.82);
+  --border: #1b2538;
+  --border-highlight: #283750;
+
+  /* Typography */
+  --text: #f0f4f8;
+  --text-muted: #7888a2;
+
+  /* Yellow: Highlights & Primary Actions */
+  --yellow: #f5c84c;
+  --yellow-hover: #e0b43b;
+  --yellow-glow: rgba(245, 200, 76, 0.28);
+
+  /* Red: Alerts, Danger, Critical States */
+  --red: #e63946;
+  --red-hover: #d12c39;
+  --red-glow: rgba(230, 57, 70, 0.35);
+
+  /* Blue: Information, Normal States, Technology */
+  --blue: #3b82f6;
+  --blue-hover: #2563eb;
+  --blue-glow: rgba(59, 130, 246, 0.3);
+  --blue-light: #60a5fa;
+
+  /* Legacy alias support */
   --gold: #f5c84c;
-  --teal: #2ec4b6;
-  --blue: #4c9aff;
+  --amber: #f5c84c;
+  --teal: #3b82f6;
 
   --font-ui: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 html, body, #root {
   height: 100%;
   margin: 0;
+  padding: 0;
 }
 
 body {
@@ -60,29 +62,59 @@ body {
   color: var(--text);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-::selection { background: var(--blue); color: #06090f; }
+::selection {
+  background: var(--yellow);
+  color: #06090e;
+}
 
-a { color: var(--blue); }
+a {
+  color: var(--blue-light);
+  text-decoration: none;
+}
 
 button {
   font-family: var(--font-ui);
   cursor: pointer;
+  border: none;
+  outline: none;
 }
 
-.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
 
+/* Status Indicators */
 .status-dot {
   display: inline-block;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   margin-right: 6px;
 }
-.status-HIGH { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
-.status-MEDIUM { background: var(--gold); }
-.status-LOW { background: var(--teal); }
+.status-CRITICAL {
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+}
+.status-HIGH {
+  background: var(--red);
+  box-shadow: 0 0 6px var(--red);
+}
+.status-WARNING {
+  background: var(--yellow);
+  box-shadow: 0 0 6px var(--yellow);
+}
+.status-MEDIUM {
+  background: var(--yellow);
+}
+.status-NORMAL,
+.status-LOW {
+  background: var(--blue);
+  box-shadow: 0 0 6px var(--blue-glow);
+}
 
 .pill {
   display: inline-flex;
@@ -91,72 +123,154 @@ button {
   font-size: 11px;
   letter-spacing: 0.02em;
   padding: 2px 8px;
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1px solid var(--border);
   color: var(--text-muted);
 }
 
-.scrollbar-thin::-webkit-scrollbar { width: 6px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-
-@keyframes pulse-live {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.85); }
+/* Custom Scrollbars */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border-highlight);
+  border-radius: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Animations */
+@keyframes pulse-live {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+}
+
 .live-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--teal);
-  animation: pulse-live 1.6s ease-in-out infinite;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  box-shadow: 0 0 8px var(--blue-light);
+  animation: pulse-live 1.8s ease-in-out infinite;
   display: inline-block;
 }
 
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(1000%); }
+@keyframes toast-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes float-subtle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
-.glow-amber {
-  box-shadow: 0 0 15px rgba(255, 159, 28, 0.25);
+/* Futuristic Glows */
+.glow-yellow {
+  box-shadow: 0 0 16px var(--yellow-glow);
 }
-
 .glow-red {
-  box-shadow: 0 0 20px rgba(230, 57, 70, 0.35);
+  box-shadow: 0 0 20px var(--red-glow);
+}
+.glow-blue {
+  box-shadow: 0 0 16px var(--blue-glow);
 }
 
-.glow-teal {
-  box-shadow: 0 0 15px rgba(46, 196, 182, 0.25);
-}
-
-/* Button & Chip utilities */
+/* Modern Action Buttons */
 .cta-button {
-  background: var(--blue);
-  color: #ffffff;
+  background: var(--yellow);
+  color: #06090e;
   border: none;
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.02em;
-  padding: 10px 22px;
+  padding: 9px 20px;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 10px rgba(76, 154, 255, 0.25);
+  box-shadow: 0 2px 10px var(--yellow-glow);
 }
 .cta-button:hover {
-  background: #3b87f0;
+  background: var(--yellow-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(76, 154, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(245, 200, 76, 0.45);
 }
 .cta-button:active {
   transform: translateY(0);
+}
+
+.cta-button-blue {
+  background: var(--blue);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  padding: 9px 20px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 10px var(--blue-glow);
+}
+.cta-button-blue:hover {
+  background: var(--blue-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
+}
+
+.cta-button-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-highlight);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.cta-button-outline:hover {
+  border-color: var(--blue);
+  background: rgba(59, 130, 246, 0.08);
+  color: #ffffff;
 }
 
 .chip-btn {
@@ -174,13 +288,17 @@ button {
   transition: all 0.15s ease;
 }
 .chip-btn:hover {
-  background: var(--border);
-  border-color: var(--text-muted);
+  background: var(--border-highlight);
+  border-color: var(--blue);
+  color: #ffffff;
 }
 
-/* Space Background Utility */
-.space-bg {
-  background: radial-gradient(circle at 50% 12%, rgba(26, 42, 74, 0.4) 0%, rgba(10, 14, 20, 1) 75%);
+/* Glass & Card Utilities */
+.glass-card {
+  background: var(--panel-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
 }
 
 .hover-lift {
@@ -188,14 +306,13 @@ button {
 }
 .hover-lift:hover {
   transform: translateY(-3px);
-  border-color: rgba(76, 154, 255, 0.45);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-.glass-card {
-  background: rgba(16, 21, 31, 0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
+/* Space Background Utility */
+.space-bg {
+  background: radial-gradient(circle at 50% 10%, rgba(20, 36, 68, 0.35) 0%, rgba(6, 9, 14, 1) 80%);
 }
 
 html {
@@ -210,6 +327,3 @@ html {
     display: inline-flex !important;
   }
 }
-
-
-
