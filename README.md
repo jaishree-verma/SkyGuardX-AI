@@ -1,7 +1,7 @@
 # SkyGuardX AI: Real-Time Space-to-Earth Decision Intelligence
 
 IBM Z Datathon prototype. Turns live satellite, orbital and Earth-hazard events into a
-ranked, explainable, human-approved action - end to end, in real time.
+ranked, explainable, human-approved action - end to end, in real time. 
 
 ```
 EVENT  →  DETECT  →  RISK  →  IMPACT  →  CASCADE  →  WHAT-IF  →  DECISION  →  EXPLAIN  →  HUMAN APPROVAL
