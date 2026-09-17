@@ -100,7 +100,7 @@ export default function AppFooter({ onNavigate, onCheckSatellite, onOpenMonitor 
                       fontWeight: 900,
                     }}
                   >
-                    TEAM MATRIX-5
+                    @matrix-5
                   </span>
                 </span>
 
@@ -350,7 +350,7 @@ export default function AppFooter({ onNavigate, onCheckSatellite, onOpenMonitor 
           }}
         >
           <div>
-            <strong style={{ color: "var(--yellow)" }}>TEAM MATRIX-5</strong> · SKYGUARD XAI © 2026 · Real-Time Space Intelligence
+            <strong style={{ color: "var(--yellow)", letterSpacing: "0.04em" }}>@matrix-5</strong> · SKYGUARD XAI © 2026 · Real-Time Space Intelligence
           </div>
 
           <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>

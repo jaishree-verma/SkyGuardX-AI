@@ -315,8 +315,148 @@ button {
   background: radial-gradient(circle at 50% 10%, rgba(20, 36, 68, 0.35) 0%, rgba(6, 9, 14, 1) 80%);
 }
 
-html {
-  scroll-behavior: smooth;
+/* Dynamic Navbar & Hover Styles */
+.nav-btn {
+  position: relative;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.nav-btn.active {
+  background: linear-gradient(135deg, rgba(20, 28, 43, 0.95) 0%, rgba(13, 18, 28, 0.98) 100%);
+  color: var(--yellow);
+  border-color: rgba(245, 200, 76, 0.4);
+  box-shadow: 0 0 16px rgba(245, 200, 76, 0.2), inset 0 1px 0 rgba(245, 200, 76, 0.3);
+}
+
+.nav-btn-primary {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(20, 28, 48, 0.8) 100%) !important;
+  color: var(--blue-light) !important;
+  border: 1px solid rgba(59, 130, 246, 0.45) !important;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+}
+
+.nav-btn-primary:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.35) 0%, rgba(245, 200, 76, 0.15) 100%) !important;
+  color: #ffffff !important;
+  border-color: var(--yellow) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.45), 0 0 10px rgba(245, 200, 76, 0.3);
+}
+
+.nav-btn-primary.active {
+  border-color: var(--yellow) !important;
+  box-shadow: 0 0 24px rgba(245, 200, 76, 0.35), inset 0 0 12px rgba(59, 130, 246, 0.3) !important;
+  color: var(--yellow) !important;
+}
+
+/* Radar Pulse Indicator */
+@keyframes radar-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 7px rgba(59, 130, 246, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+.radar-live {
+  animation: radar-pulse 2s infinite ease-in-out;
+}
+
+/* Continuous Scrobbler Marquee */
+@keyframes scrobbler-track {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.scrobbler-wrapper {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  position: relative;
+}
+
+.scrobbler-track {
+  display: flex;
+  gap: 20px;
+  animation: scrobbler-track 35s linear infinite;
+  width: max-content;
+}
+
+.scrobbler-wrapper:hover .scrobbler-track {
+  animation-play-state: paused;
+}
+
+.scrobbler-card {
+  background: rgba(13, 18, 28, 0.75);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  min-width: 320px;
+  max-width: 360px;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.scrobbler-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--yellow);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6), 0 0 16px rgba(245, 200, 76, 0.2);
+  background: rgba(20, 28, 48, 0.85);
+}
+
+@media (max-width: 1400px) {
+  .navbar-clock {
+    display: none !important;
+  }
+  .navbar-center-nav {
+    gap: 4px !important;
+  }
+  .navbar-center-nav .nav-btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .navbar-target-selector {
+    max-width: 180px !important;
+  }
+  .navbar-target-selector select {
+    max-width: 110px !important;
+  }
 }
 
 @media (max-width: 900px) {

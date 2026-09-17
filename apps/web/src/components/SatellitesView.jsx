@@ -2,7 +2,15 @@ import React, { useState } from "react";
 import SatelliteTable from "./SatelliteTable.jsx";
 import SatelliteDetail from "./SatelliteDetail.jsx";
 
-export default function SatellitesView({ satellites = {}, risks = {}, conjunction, onSelectSatellite, selectedSatId }) {
+export default function SatellitesView({
+  satellites = {},
+  risks = {},
+  conjunction,
+  onSelectSatellite,
+  selectedSatId,
+  onCheckSatellite,
+  onOpenMonitor,
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const satList = Object.values(satellites);
 
@@ -66,6 +74,7 @@ export default function SatellitesView({ satellites = {}, risks = {}, conjunctio
             risks={risks}
             selectedSatId={selectedSatId}
             onSelectSatellite={onSelectSatellite}
+            onInspectSatellite={onCheckSatellite}
           />
         </div>
 
@@ -74,6 +83,8 @@ export default function SatellitesView({ satellites = {}, risks = {}, conjunctio
             satellite={selectedSat}
             risk={selectedRisk}
             conjunction={conjunction}
+            onCheckSatellite={onCheckSatellite}
+            onOpenMonitor={onOpenMonitor}
           />
         </div>
       </div>

@@ -11,7 +11,7 @@ const STATUS_BADGE = {
   STALE: { bg: "rgba(102, 115, 140, 0.15)", color: "#66738c", border: "rgba(102, 115, 140, 0.3)" },
 };
 
-export default function SatelliteTable({ satellites, risks, selectedSatId, onSelectSatellite }) {
+export default function SatelliteTable({ satellites, risks, selectedSatId, onSelectSatellite, onInspectSatellite }) {
   const satList = Object.values(satellites).sort((a, b) => {
     // Put highest risk on top
     const riskA = risks[a.satellite_id]?.risk_score || 0;
@@ -35,7 +35,7 @@ export default function SatelliteTable({ satellites, risks, selectedSatId, onSel
         }}
       >
         <span>ACTIVE SATELLITE FLEET ({satList.length})</span>
-        <span style={{ fontSize: 10, color: "var(--text-muted)" }}>SELECT ROW TO INSPECT</span>
+        <span style={{ fontSize: 10, color: "var(--text-muted)" }}>SELECT ROW OR CLICK SCAN</span>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto" }} className="scrollbar-thin">
@@ -49,7 +49,8 @@ export default function SatelliteTable({ satellites, risks, selectedSatId, onSel
               <th style={{ padding: "8px 8px" }}>TEMP</th>
               <th style={{ padding: "8px 8px" }}>BATT</th>
               <th style={{ padding: "8px 8px" }}>SIGNAL</th>
-              <th style={{ padding: "8px 12px", textAlign: "right" }}>AGE</th>
+              <th style={{ padding: "8px 8px" }}>AGE</th>
+              <th style={{ padding: "8px 10px", textAlign: "right" }}>ACTION</th>
             </tr>
           </thead>
           <tbody>
@@ -131,8 +132,35 @@ export default function SatelliteTable({ satellites, risks, selectedSatId, onSel
                       {sat.signal_strength?.toFixed(0)}%
                     </span>
                   </td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                  <td style={{ padding: "10px 8px", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
                     {age}
+                  </td>
+                  <td style={{ padding: "10px 10px", textAlign: "right" }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onInspectSatellite) onInspectSatellite(sat.satellite_id);
+                        else if (onSelectSatellite) onSelectSatellite(sat.satellite_id);
+                      }}
+                      style={{
+                        background: "rgba(245, 200, 76, 0.15)",
+                        border: "1px solid rgba(245, 200, 76, 0.4)",
+                        color: "var(--yellow)",
+                        padding: "3px 8px",
+                        borderRadius: 4,
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        fontFamily: "var(--font-mono)",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 3,
+                      }}
+                      title={`Run AI anomaly risk scan on ${sat.satellite_id}`}
+                    >
+                      <span>🔍</span>
+                      <span>SCAN</span>
+                    </button>
                   </td>
                 </tr>
               );

@@ -18,6 +18,7 @@ export default function SpaceMap({
   spaceObjects = [],
   selectedSatId,
   onSelectSatellite,
+  onInspectSatellite,
   conjunction,
 }) {
   // Find coordinates for conjunction vector
@@ -125,6 +126,36 @@ export default function SpaceMap({
                       </div>
                     )}
                   </div>
+                  {!isDebris && (
+                    <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.12)" }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onInspectSatellite) onInspectSatellite(id);
+                          else if (onSelectSatellite) onSelectSatellite(id);
+                        }}
+                        style={{
+                          width: "100%",
+                          background: "rgba(245, 200, 76, 0.15)",
+                          border: "1px solid var(--yellow)",
+                          color: "var(--yellow)",
+                          borderRadius: 4,
+                          padding: "5px 8px",
+                          fontSize: 10.5,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontFamily: "var(--font-mono)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 5,
+                        }}
+                      >
+                        <span>🔍</span>
+                        <span>Run AI Risk Scan ➔</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </Popup>
             </CircleMarker>

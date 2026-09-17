@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import GlossaryTooltip from "./GlossaryTooltip.jsx";
 import SpaceRocketHero3D from "./SpaceRocketHero3D.jsx";
+import SkyGuardDefenseShowcase from "./SkyGuardDefenseShowcase.jsx";
 import AppFooter from "./AppFooter.jsx";
 
 export default function LandingPage({
@@ -58,6 +59,268 @@ export default function LandingPage({
         connected={connected}
         lastEventTime={lastEventTime}
         alertsCount={alertsCount}
+      />
+
+      {/* ========================================================================= */}
+      {/* SECTION 1.5: ABOUT SKYGUARDX AI & 5-LAYER ARCHITECTURE SCROBBLER */}
+      {/* ========================================================================= */}
+      <section
+        style={{
+          padding: "36px 0 32px",
+          background: "linear-gradient(180deg, rgba(6, 9, 14, 0.98) 0%, rgba(13, 18, 28, 0.95) 50%, rgba(6, 9, 14, 0.98) 100%)",
+          borderTop: "1px solid rgba(59, 130, 246, 0.25)",
+          borderBottom: "1px solid rgba(59, 130, 246, 0.25)",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <div style={{ maxWidth: 1200, margin: "0 auto 20px", padding: "0 24px" }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--blue)", fontWeight: 800, letterSpacing: "0.08em", background: "rgba(59, 130, 246, 0.12)", border: "1px solid rgba(59, 130, 246, 0.3)", padding: "3px 8px", borderRadius: 4, marginBottom: 6 }}>
+                <span>🛡️</span>
+                <span>MISSION & ARCHITECTURE · BUILT BY @MATRIX-5</span>
+              </div>
+              <h2 style={{ fontSize: 26, fontWeight: 900, margin: "2px 0 0", color: "#ffffff", letterSpacing: "-0.01em" }}>
+                About SKYGUARD XAI
+              </h2>
+              <div style={{ fontSize: 13.5, color: "var(--text-muted)", marginTop: 4 }}>
+                Real-Time Space-to-Earth Emergency Decision Intelligence built for the IBM Z Datathon.
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--blue-light)" }}>
+              <span className="radar-live" style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--teal)" }} />
+              <span>THE 5-LAYER DECISION ARCHITECTURE SCROBBLER</span>
+            </div>
+          </div>
+
+          {/* Datathon Theme Card */}
+          <div
+            style={{
+              background: "linear-gradient(90deg, rgba(59, 130, 246, 0.12) 0%, rgba(13, 18, 28, 0.85) 100%)",
+              border: "1px solid rgba(59, 130, 246, 0.3)",
+              borderRadius: 8,
+              padding: "16px 20px",
+              marginBottom: 20,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div style={{ fontSize: 10.5, fontFamily: "var(--font-mono)", color: "var(--blue-light)", fontWeight: 800, letterSpacing: "0.06em" }}>
+              DATATHON THEME: REAL-TIME AI FOR CRITICAL DECISIONS
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text)", marginTop: 6, lineHeight: 1.5 }}>
+              In modern space and orbital operations, anomalies unfold in seconds, but orbital collisions can trigger irreversible cascades.
+              SKYGUARD XAI bridges real-time telemetry streaming with unsupervised machine learning to deliver explainable, actionable decision intelligence before a threat escalates.
+            </div>
+          </div>
+        </div>
+
+        {/* Continuous Horizontal Scrobbler Ribbon (The 5-Layer Decision Architecture) */}
+        <div className="scrobbler-wrapper" style={{ padding: "6px 0" }}>
+          <div className="scrobbler-track">
+            {[
+              {
+                layer: "LAYER 1",
+                tag: "SPACE INTELLIGENCE",
+                status: "ACTIVE & VERIFIED",
+                statusColor: "var(--teal)",
+                icon: "🛰️",
+                title: "Space Intelligence",
+                desc: "Continuous satellite telemetry ingestion, 5-feature Isolation Forest anomaly detection, 3D spatial debris conjunction tracking, and transparent 0–100% unified risk scoring.",
+                tech: "SGP4 · Scikit-Learn · Celestrack TLE",
+                view: "monitor",
+              },
+              {
+                layer: "LAYER 2",
+                tag: "EARTH IMPACT",
+                status: "LIVE GEOJSON",
+                statusColor: "var(--yellow)",
+                icon: "🌍",
+                title: "Earth Impact Risk",
+                desc: "Translates orbital satellite degradation and debris re-entry trajectories into geographic hazard zones and ground asset risk footprints with active NOAA wildfire/flood polygons.",
+                tech: "NOAA CAP Alerts · Shapely Geometry",
+                view: "monitor",
+              },
+              {
+                layer: "LAYER 3",
+                tag: "EMERGENCY RESPONSE",
+                status: "LIVE OVERPASS",
+                statusColor: "var(--blue-light)",
+                icon: "🏥",
+                title: "Emergency Response",
+                desc: "Synthesizes ground infrastructure vulnerability, population density corridors, and regional emergency services readiness across hospitals, fire stations, and critical logistics.",
+                tech: "OpenStreetMap · Overpass API",
+                view: "monitor",
+              },
+              {
+                layer: "LAYER 4",
+                tag: "CRITICAL LOGISTICS",
+                status: "CASCADE GRAPH",
+                statusColor: "#a855f7",
+                icon: "⚡",
+                title: "Critical Logistics",
+                desc: "Dynamic routing for hospitals, ambulances, and emergency logistics impacted by telecommunications or power disruptions modeled via a NetworkX dependency propagation graph.",
+                tech: "NetworkX · GeoPandas Spatial Joins",
+                view: "analytics",
+              },
+              {
+                layer: "LAYER 5",
+                tag: "MAINFRAME TRANSACTION BOUNDARY",
+                status: "IBM Z & QUANTUM-SAFE",
+                statusColor: "var(--yellow)",
+                icon: "🛡️",
+                title: "IBM Z Transaction Boundary",
+                desc: "Sub-4ms in-transaction AI scoring via IBM Telum coprocessor + Post-Quantum ML-KEM-1024 cryptographic approval ledger committed immutably to IBM Db2 for z/OS.",
+                tech: "IBM Telum · Db2 z/OS · ML-KEM-1024",
+                view: "analytics",
+              },
+              {
+                layer: "ENGINEERED BY",
+                tag: "MISSION CONTROL",
+                status: "DATATHON 2026",
+                statusColor: "var(--yellow)",
+                icon: "🚀",
+                title: "Team @matrix-5",
+                desc: "Architected for the IBM Z Datathon 2026. Built with high-assurance aerospace safety rules: strict human-in-the-loop sign-off, zero hallucinations, and tamper-proof audit trails.",
+                tech: "Team @matrix-5 · Verified Prototype",
+                view: "about",
+              },
+              // Duplicate set for seamless continuous loop
+              {
+                layer: "LAYER 1",
+                tag: "SPACE INTELLIGENCE",
+                status: "ACTIVE & VERIFIED",
+                statusColor: "var(--teal)",
+                icon: "🛰️",
+                title: "Space Intelligence",
+                desc: "Continuous satellite telemetry ingestion, 5-feature Isolation Forest anomaly detection, 3D spatial debris conjunction tracking, and transparent 0–100% unified risk scoring.",
+                tech: "SGP4 · Scikit-Learn · Celestrack TLE",
+                view: "monitor",
+              },
+              {
+                layer: "LAYER 2",
+                tag: "EARTH IMPACT",
+                status: "LIVE GEOJSON",
+                statusColor: "var(--yellow)",
+                icon: "🌍",
+                title: "Earth Impact Risk",
+                desc: "Translates orbital satellite degradation and debris re-entry trajectories into geographic hazard zones and ground asset risk footprints with active NOAA wildfire/flood polygons.",
+                tech: "NOAA CAP Alerts · Shapely Geometry",
+                view: "monitor",
+              },
+              {
+                layer: "LAYER 3",
+                tag: "EMERGENCY RESPONSE",
+                status: "LIVE OVERPASS",
+                statusColor: "var(--blue-light)",
+                icon: "🏥",
+                title: "Emergency Response",
+                desc: "Synthesizes ground infrastructure vulnerability, population density corridors, and regional emergency services readiness across hospitals, fire stations, and critical logistics.",
+                tech: "OpenStreetMap · Overpass API",
+                view: "monitor",
+              },
+              {
+                layer: "LAYER 4",
+                tag: "CRITICAL LOGISTICS",
+                status: "CASCADE GRAPH",
+                statusColor: "#a855f7",
+                icon: "⚡",
+                title: "Critical Logistics",
+                desc: "Dynamic routing for hospitals, ambulances, and emergency logistics impacted by telecommunications or power disruptions modeled via a NetworkX dependency propagation graph.",
+                tech: "NetworkX · GeoPandas Spatial Joins",
+                view: "analytics",
+              },
+              {
+                layer: "LAYER 5",
+                tag: "MAINFRAME TRANSACTION BOUNDARY",
+                status: "IBM Z & QUANTUM-SAFE",
+                statusColor: "var(--yellow)",
+                icon: "🛡️",
+                title: "IBM Z Transaction Boundary",
+                desc: "Sub-4ms in-transaction AI scoring via IBM Telum coprocessor + Post-Quantum ML-KEM-1024 cryptographic approval ledger committed immutably to IBM Db2 for z/OS.",
+                tech: "IBM Telum · Db2 z/OS · ML-KEM-1024",
+                view: "analytics",
+              },
+              {
+                layer: "ENGINEERED BY",
+                tag: "MISSION CONTROL",
+                status: "DATATHON 2026",
+                statusColor: "var(--yellow)",
+                icon: "🚀",
+                title: "Team @matrix-5",
+                desc: "Architected for the IBM Z Datathon 2026. Built with high-assurance aerospace safety rules: strict human-in-the-loop sign-off, zero hallucinations, and tamper-proof audit trails.",
+                tech: "Team @matrix-5 · Verified Prototype",
+                view: "about",
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="scrobbler-card"
+                onClick={() => onNavigateView ? onNavigateView(item.view) : onOpenMonitor ? onOpenMonitor() : null}
+                style={{
+                  minWidth: "340px",
+                  maxWidth: "380px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, fontFamily: "var(--font-mono)", color: "var(--blue-light)" }}>
+                      {item.layer}
+                    </span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 10 }}>·</span>
+                    <span style={{ fontSize: 9.5, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                      {item.tag}
+                    </span>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 8.5,
+                      fontWeight: 800,
+                      fontFamily: "var(--font-mono)",
+                      color: item.statusColor,
+                      background: "rgba(255, 255, 255, 0.05)",
+                      border: `1px solid ${item.statusColor}55`,
+                      padding: "2px 6px",
+                      borderRadius: 3,
+                    }}
+                  >
+                    {item.status}
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 20 }}>{item.icon}</span>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: "#ffffff" }}>
+                    {item.title}
+                  </span>
+                </div>
+
+                <div style={{ fontSize: 11.5, color: "var(--text-muted)", lineHeight: 1.5, marginBottom: 12 }}>
+                  {item.desc}
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 8 }}>
+                  <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--blue-light)" }}>
+                    {item.tech}
+                  </span>
+                  <span style={{ fontSize: 11, color: "var(--yellow)", fontWeight: 700 }}>
+                    Inspect ↗
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECTION 1.75: SKYGUARD REAL-TIME TRANSACTIONAL & SYSTEM DEFENSE SHOWCASE */}
+      {/* ========================================================================= */}
+      <SkyGuardDefenseShowcase
+        onOpenMonitor={onOpenMonitor}
+        onNavigateAbout={() => (onNavigateView ? onNavigateView("about") : null)}
       />
 
       {/* ========================================================================= */}

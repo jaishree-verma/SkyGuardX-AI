@@ -1,7 +1,7 @@
 import React from "react";
 import TelemetryGraphs from "./TelemetryGraphs.jsx";
 
-export default function SatelliteDetail({ satellite, risk, conjunction, history }) {
+export default function SatelliteDetail({ satellite, risk, conjunction, history, onCheckSatellite, onOpenMonitor }) {
   if (!satellite) {
     return (
       <div style={{ padding: "30px 20px", textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
@@ -90,6 +90,61 @@ export default function SatelliteDetail({ satellite, risk, conjunction, history 
             <div style={{ color: "var(--text-muted)", fontSize: 9 }}>VELOCITY</div>
             <div style={{ fontWeight: 600 }}>{satellite.velocity_kms} km/s</div>
           </div>
+        </div>
+
+        {/* Quick Action Navigation Bar */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
+          {onCheckSatellite && (
+            <button
+              onClick={() => onCheckSatellite(satellite.satellite_id)}
+              style={{
+                background: "rgba(245, 200, 76, 0.15)",
+                border: "1px solid var(--yellow)",
+                color: "var(--yellow)",
+                padding: "7px 10px",
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 700,
+                fontFamily: "var(--font-mono)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                transition: "all 0.15s ease",
+              }}
+              title={`Run deep AI diagnostic scan on ${satellite.satellite_id}`}
+            >
+              <span>🔍</span>
+              <span>AI Risk Scan</span>
+            </button>
+          )}
+
+          {onOpenMonitor && (
+            <button
+              onClick={() => onOpenMonitor(satellite.satellite_id)}
+              style={{
+                background: "rgba(59, 130, 246, 0.15)",
+                border: "1px solid var(--blue)",
+                color: "var(--blue-light)",
+                padding: "7px 10px",
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 700,
+                fontFamily: "var(--font-mono)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                transition: "all 0.15s ease",
+              }}
+              title={`View ${satellite.satellite_id} on the live orbital map`}
+            >
+              <span>📡</span>
+              <span>View on Map</span>
+            </button>
+          )}
         </div>
       </div>
 

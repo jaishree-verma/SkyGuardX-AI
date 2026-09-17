@@ -618,6 +618,19 @@ async def approve_recommendation(recommendation_id: str, req: ApprovalRequest):
     rec["approved_at"] = datetime.now(timezone.utc).isoformat()
     rec["notes"] = req.notes
 
+    # Commit decision to IBM Z Transactional Boundary (Db2 on z/OS + Quantum-Safe signature)
+    try:
+        ibm_z_txn = await boundary.commit_decision_transaction({
+            "recommendation_id": recommendation_id,
+            "approver": req.approver,
+            "decision": rec["approval_state"],
+            "action_type": rec.get("action_type", rec.get("action", "ORBITAL_MANEUVER")),
+        })
+        rec["ibm_z_transaction"] = ibm_z_txn
+    except Exception as exc:
+        logger.warning("IBM Z transaction commit error: %s", exc)
+        rec["ibm_z_transaction"] = None
+
     try:
         with SessionLocal() as db:
             db.add(Recommendation(
@@ -632,7 +645,10 @@ async def approve_recommendation(recommendation_id: str, req: ApprovalRequest):
         logger.warning("recommendation persist skipped: %s", exc)
 
     _write_audit(actor=req.approver, recommendation_id=recommendation_id, event={
-        "type": "human_approval", "decision": rec["approval_state"], "notes": req.notes,
+        "type": "human_approval",
+        "decision": rec["approval_state"],
+        "notes": req.notes,
+        "ibm_z_transaction": rec.get("ibm_z_transaction"),
     })
     await manager.broadcast("recommendation_decided", rec)
     return rec

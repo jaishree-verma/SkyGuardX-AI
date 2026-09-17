@@ -194,6 +194,9 @@ function AppContent() {
         demoStatus={demoStatus}
         onStartDemo={handleStartDemo}
         onResetDemo={handleResetDemo}
+        selectedSatId={selectedSatId}
+        onSelectSatellite={setSelectedSatId}
+        satellites={satellites}
       />
 
       {/* 2. Main Product Flow Switcher */}
@@ -234,6 +237,8 @@ function AppContent() {
         {currentView === "monitor" && (
           <CommandCenter
             isEmbedded={true}
+            selectedSatId={selectedSatId}
+            onSelectSatellite={setSelectedSatId}
             onInspectSatellite={(id) => handleNavigate("check", id)}
             onNavigateTab={handleNavigate}
           />
@@ -249,6 +254,7 @@ function AppContent() {
               selectedSatId={selectedSatId}
               onSelectSatellite={(id) => setSelectedSatId(id)}
               onCheckSatellite={handleNavigateToCheck}
+              onOpenMonitor={(satId) => handleNavigate("monitor", satId)}
             />
           </div>
         )}

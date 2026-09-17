@@ -14,11 +14,19 @@ import EventsView from "./EventsView.jsx";
 import AnalyticsView from "./AnalyticsView.jsx";
 import AlertBanner from "./AlertBanner.jsx";
 
-export default function CommandCenter({ isEmbedded = false }) {
+export default function CommandCenter({
+  isEmbedded = false,
+  selectedSatId: propSelectedSatId,
+  onSelectSatellite: propOnSelectSatellite,
+  onInspectSatellite,
+  onNavigateTab,
+}) {
   const { connected, lastEventTime, events, satellites, spaceObjects, risks, conjunction, alerts } = useNexusSocket();
 
   const [activeTab, setActiveTab] = useState("overview");
-  const [selectedSatId, setSelectedSatId] = useState("SAT-1042");
+  const [internalSatId, setInternalSatId] = useState("SAT-1042");
+  const selectedSatId = propSelectedSatId !== undefined ? propSelectedSatId : internalSatId;
+  const setSelectedSatId = propOnSelectSatellite || setInternalSatId;
   const [activeAlerts, setActiveAlerts] = useState([]);
   const [demoStatus, setDemoStatus] = useState("idle"); // idle | running | reset
 
@@ -68,7 +76,11 @@ export default function CommandCenter({ isEmbedded = false }) {
 
   const handleInspectSatellite = (satId) => {
     setSelectedSatId(satId);
-    setActiveTab("satellites");
+    if (onInspectSatellite) {
+      onInspectSatellite(satId);
+    } else {
+      setActiveTab("satellites");
+    }
   };
 
   // Find selected satellite and identify the highest risk satellite across the fleet
@@ -107,7 +119,13 @@ export default function CommandCenter({ isEmbedded = false }) {
       {/* 1. Top Navigation Bar */}
       <DashboardHeader
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tabId) => {
+          if (onNavigateTab && tabId !== "overview") {
+            onNavigateTab(tabId);
+          } else {
+            setActiveTab(tabId);
+          }
+        }}
         connected={connected}
         lastEventTime={lastEventTime}
         demoStatus={demoStatus}
@@ -188,6 +206,7 @@ export default function CommandCenter({ isEmbedded = false }) {
                     spaceObjects={spaceObjects}
                     selectedSatId={selectedSatId}
                     onSelectSatellite={setSelectedSatId}
+                    onInspectSatellite={handleInspectSatellite}
                     conjunction={conjunction}
                   />
                 </div>
@@ -198,6 +217,7 @@ export default function CommandCenter({ isEmbedded = false }) {
                     risks={risks}
                     selectedSatId={selectedSatId}
                     onSelectSatellite={setSelectedSatId}
+                    onInspectSatellite={handleInspectSatellite}
                   />
                 </div>
               </div>
