@@ -467,3 +467,173 @@ button {
     display: inline-flex !important;
   }
 }
+
+/* ========================================================================= */
+/* 3D EFFECTS & CINEMATIC ANIMATIONS                                         */
+/* ========================================================================= */
+
+/* 3D Card Hover Depth */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1500 {
+  perspective: 1500px;
+}
+
+/* Smooth 3D Floating Motion */
+@keyframes float-3d-slow {
+  0%, 100% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotateX(1.5deg) rotateY(-1.5deg);
+  }
+}
+
+.float-3d {
+  animation: float-3d-slow 6s ease-in-out infinite;
+}
+
+@keyframes float-3d-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: translateY(7px) rotateX(-1deg) rotateY(1.5deg);
+  }
+}
+
+.float-3d-rev {
+  animation: float-3d-reverse 7s ease-in-out infinite;
+}
+
+/* Radar Sweep Scanner Beam */
+@keyframes radar-sweep-beam {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 50%;
+  transform-origin: 0% 0%;
+  background: conic-gradient(from 0deg, rgba(59, 130, 246, 0.45) 0deg, rgba(59, 130, 246, 0) 60deg);
+  border-radius: 100% 0 0 0;
+  animation: radar-sweep-beam 4s linear infinite;
+  pointer-events: none;
+}
+
+/* Radar Sonar Ping Wave */
+@keyframes sonar-wave {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.sonar-ping {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid var(--blue);
+  animation: sonar-wave 3s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+/* Laser Dataflow Pipeline Animation */
+@keyframes laser-flow-right {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.laser-pipeline {
+  background: linear-gradient(90deg, 
+    rgba(59, 130, 246, 0.15) 0%, 
+    rgba(96, 165, 250, 0.95) 50%, 
+    rgba(59, 130, 246, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  animation: laser-flow-right 2.4s linear infinite;
+}
+
+.laser-pipeline-amber {
+  background: linear-gradient(90deg, 
+    rgba(245, 200, 76, 0.15) 0%, 
+    rgba(255, 226, 122, 0.95) 50%, 
+    rgba(245, 200, 76, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  animation: laser-flow-right 2.4s linear infinite;
+}
+
+.laser-pipeline-red {
+  background: linear-gradient(90deg, 
+    rgba(230, 57, 70, 0.15) 0%, 
+    rgba(255, 120, 130, 0.95) 50%, 
+    rgba(230, 57, 70, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  animation: laser-flow-right 2s linear infinite;
+}
+
+/* High-Tech Gradient Text */
+.gradient-text-blue {
+  background: linear-gradient(135deg, #ffffff 0%, #93c5fd 60%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, #ffffff 0%, #fde68a 60%, #f5c84c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-red {
+  background: linear-gradient(135deg, #ffffff 0%, #fca5a5 60%, #e63946 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Pulsing 3D Ring */
+@keyframes ring-pulse-spin {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.7;
+  }
+}
+
+.animated-orbit-ring {
+  animation: ring-pulse-spin 18s linear infinite;
+}
+

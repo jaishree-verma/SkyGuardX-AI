@@ -114,14 +114,95 @@ export default function SpaceRocketHero3D({
     scene.add(ring2);
     scene.add(ring3);
 
-    // 3. Orbiting Satellite 3D Meshes (Nodes)
-    const satGeo = new THREE.SphereGeometry(1.2, 16, 16);
-    const satMat1 = new THREE.MeshBasicMaterial({ color: 0x3b82f6 });
-    const satMat2 = new THREE.MeshBasicMaterial({ color: 0xf5c84c });
-    const satMesh1 = new THREE.Mesh(satGeo, satMat1);
-    const satMesh2 = new THREE.Mesh(satGeo, satMat2);
+    // 3. 3D Earth Globe with Wireframe Grid & Atmospheric Aura (Positioned in space depth)
+    const earthGroup = new THREE.Group();
+    earthGroup.position.set(42, -26, -18);
+
+    // Earth deep body
+    const earthGeo = new THREE.SphereGeometry(22, 36, 36);
+    const earthMat = new THREE.MeshBasicMaterial({
+      color: 0x081326,
+    });
+    const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+    earthGroup.add(earthMesh);
+
+    // Earth wireframe longitude/latitude telemetry grid
+    const gridGeo = new THREE.SphereGeometry(22.25, 26, 18);
+    const gridMat = new THREE.MeshBasicMaterial({
+      color: 0x2563eb,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.42,
+    });
+    const gridMesh = new THREE.Mesh(gridGeo, gridMat);
+    earthGroup.add(gridMesh);
+
+    // Earth atmospheric glowing rim
+    const glowGeo = new THREE.SphereGeometry(24.8, 32, 32);
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.16,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+    });
+    const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+    earthGroup.add(glowMesh);
+    scene.add(earthGroup);
+
+    // 4. Orbiting Satellite 3D Units with Solar Panels & Beacon Halos
+    const createSatelliteUnit = (colorHex) => {
+      const unit = new THREE.Group();
+      // Main Chassis
+      const core = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5, 1.2, 1.2),
+        new THREE.MeshBasicMaterial({ color: 0xf8fafc })
+      );
+      // Solar Arrays
+      const panels = new THREE.Mesh(
+        new THREE.BoxGeometry(4.4, 0.15, 0.9),
+        new THREE.MeshBasicMaterial({ color: colorHex })
+      );
+      // Outer Sensor Glow
+      const beacon = new THREE.Mesh(
+        new THREE.SphereGeometry(1.6, 12, 12),
+        new THREE.MeshBasicMaterial({
+          color: colorHex,
+          transparent: true,
+          opacity: 0.4,
+          blending: THREE.AdditiveBlending,
+        })
+      );
+      unit.add(core);
+      unit.add(panels);
+      unit.add(beacon);
+      return unit;
+    };
+
+    const satMesh1 = createSatelliteUnit(0x3b82f6); // SAT-1042 (Blue/Cyber)
+    const satMesh2 = createSatelliteUnit(0xf5c84c); // SAT-1001 (Gold/Sentinel)
+    const debrisMesh = new THREE.Mesh(
+      new THREE.DodecahedronGeometry(1.1),
+      new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true })
+    ); // DEB-2098 Debris
+
     scene.add(satMesh1);
     scene.add(satMesh2);
+    scene.add(debrisMesh);
+
+    // 5. Dynamic 3D Conjunction Threat Laser Line
+    const conjLineGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, 0),
+    ]);
+    const conjLineMat = new THREE.LineBasicMaterial({
+      color: 0xef4444,
+      transparent: true,
+      opacity: 0.75,
+      blending: THREE.AdditiveBlending,
+    });
+    const conjLine = new THREE.Line(conjLineGeo, conjLineMat);
+    scene.add(conjLine);
 
     // Mouse Tracking for Parallax
     let targetX = 0;
@@ -164,6 +245,9 @@ export default function SpaceRocketHero3D({
       starField.rotation.y += 0.0004;
       starField.rotation.x += 0.0002;
 
+      earthGroup.rotation.y += 0.002;
+      earthGroup.rotation.x = Math.sin(angle * 0.2) * 0.08;
+
       ring1.rotation.z += 0.001;
       ring2.rotation.z -= 0.0012;
       ring3.rotation.z += 0.0008;
@@ -172,10 +256,31 @@ export default function SpaceRocketHero3D({
       satMesh1.position.x = Math.cos(angle) * 58;
       satMesh1.position.y = Math.sin(angle) * 38;
       satMesh1.position.z = Math.sin(angle * 1.5) * 20;
+      satMesh1.rotation.y += 0.02;
+      satMesh1.rotation.z = Math.sin(angle) * 0.5;
 
       satMesh2.position.x = Math.cos(-angle * 0.7) * 72;
       satMesh2.position.y = Math.sin(-angle * 0.7) * 44;
       satMesh2.position.z = Math.cos(angle) * 25;
+      satMesh2.rotation.y -= 0.015;
+
+      // Position debris approaching SAT-1042
+      debrisMesh.position.x = satMesh1.position.x + Math.sin(angle * 3) * 7;
+      debrisMesh.position.y = satMesh1.position.y + Math.cos(angle * 3) * 6;
+      debrisMesh.position.z = satMesh1.position.z + Math.sin(angle * 2) * 5;
+      debrisMesh.rotation.x += 0.03;
+      debrisMesh.rotation.y += 0.04;
+
+      // Update conjunction threat laser line between sat1 and debris
+      const linePositions = conjLine.geometry.attributes.position.array;
+      linePositions[0] = satMesh1.position.x;
+      linePositions[1] = satMesh1.position.y;
+      linePositions[2] = satMesh1.position.z;
+      linePositions[3] = debrisMesh.position.x;
+      linePositions[4] = debrisMesh.position.y;
+      linePositions[5] = debrisMesh.position.z;
+      conjLine.geometry.attributes.position.needsUpdate = true;
+      conjLine.material.opacity = 0.4 + Math.sin(angle * 6) * 0.4; // Pulsing threat laser
 
       // Smooth camera interpolation with mouse parallax
       currentX += (targetX - currentX) * 0.05;
