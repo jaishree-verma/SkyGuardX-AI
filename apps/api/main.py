@@ -38,8 +38,11 @@ from services.space_risk.alerts import alert_manager
 from services.space_risk.simulator import SpaceSimulator, demo_controller
 from services.space_risk.anomaly import evaluate_model
 from services.space_risk.tle_data import load_sample_tle, load_active_tle
+from services.space_risk import live_asteroids_feed
 from services.earth_risk import hazard as earth_hazard
 from services.earth_risk import live_hazard_feed
+from services.earth_risk import live_eonet_feed
+from services.earth_risk import live_weather_feed
 from services.impact_engine import impact as impact_engine
 from services.impact_engine import live_geo
 from services.cascade_engine.cascade import build_wildfire_cascade_graph, propagate, cascade_summary
@@ -77,6 +80,9 @@ DATA_SOURCES: dict[str, str] = {
     "earth_hazard": "not_loaded_yet",  # "live" (NWS) | "sample_fallback"
     "roads_facilities_population": "not_loaded_yet",  # "live" (OpenStreetMap) | "sample_fallback"
     "satellite_telemetry": "simulated",  # always simulated — see note below
+    "space_asteroids": "not_loaded_yet",
+    "earth_eonet": "not_loaded_yet",
+    "weather": "not_loaded_yet",
 }
 # NOTE on satellite_telemetry: there is no public, free, real-time feed of
 # any real satellite's internal health telemetry (solar output, battery
@@ -410,6 +416,47 @@ async def on_startup() -> None:
         LIVE_ASSETS = None  # impact_engine.compute_impact() falls back to bundled sample
         DATA_SOURCES["roads_facilities_population"] = "sample_fallback"
 
+    # 4. NASA EONET
+    if settings.nasa_eonet_enabled:
+        eonet_hazard = await live_eonet_feed.get_live_eonet_hazard()
+        if eonet_hazard:
+            DATA_SOURCES["earth_eonet"] = "live"
+            # Augment or replace LATEST_HAZARD_RECORD if needed
+            if not LATEST_HAZARD_RECORD:
+                LATEST_HAZARD_RECORD = eonet_hazard
+                DATA_SOURCES["earth_hazard"] = "live_eonet"
+        else:
+            DATA_SOURCES["earth_eonet"] = "unavailable"
+    else:
+        DATA_SOURCES["earth_eonet"] = "disabled"
+
+    # 5. NASA NeoWs
+    asteroid = await live_asteroids_feed.get_live_asteroid_hazard()
+    if asteroid:
+        DATA_SOURCES["space_asteroids"] = "live"
+    else:
+        DATA_SOURCES["space_asteroids"] = "unavailable"
+
+    # 6. Open-Meteo Weather
+    if settings.open_meteo_enabled and LATEST_HAZARD_RECORD:
+        try:
+            geom = LATEST_HAZARD_RECORD.get("geometry")
+            if geom:
+                # Need to use bounds or representative point depending on geometry type
+                # For simplicity, if it has bounds, get center
+                bounds = geom.bounds
+                lat = (bounds[1] + bounds[3]) / 2.0
+                lon = (bounds[0] + bounds[2]) / 2.0
+                weather = await live_weather_feed.fetch_current_weather(lat, lon)
+                if weather:
+                    DATA_SOURCES["weather"] = "live"
+                    LATEST_HAZARD_RECORD = live_weather_feed.enhance_hazard_with_weather(LATEST_HAZARD_RECORD, weather)
+                else:
+                    DATA_SOURCES["weather"] = "unavailable"
+        except Exception as exc:
+            logger.warning("Could not fetch weather: %s", exc)
+            DATA_SOURCES["weather"] = "error"
+
     asyncio.create_task(SpaceSimulator(gateway).start())
     logger.info(
         "SkyGuard-X API started (env=%s, ibm_z_integration_enabled=%s) | data sources: %s",
@@ -451,6 +498,9 @@ async def data_sources():
         "notes": {
             "satellite_telemetry": "Simulated continuous multi-satellite telemetry generator with realistic Gaussian noise.",
             "satellite_orbital_elements": "Celestrak live TLE with fallback to bundled offline sample.",
+            "earth_eonet": "NASA EONET live natural events.",
+            "space_asteroids": "NASA NeoWs live asteroid tracking.",
+            "weather": "Open-Meteo live weather data for the current hazard."
         },
     }
 

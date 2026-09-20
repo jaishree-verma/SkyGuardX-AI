@@ -19,6 +19,11 @@ class Settings(BaseModel):
     app_name: str = "SkyGuard-X"
     environment: str = os.getenv("NEXUS_ENV", "development")
 
+    # --- Live Data APIs (public-apis plugins) ---
+    nasa_neows_api_key: str = os.getenv("NASA_NEOWS_API_KEY", "DEMO_KEY")
+    nasa_eonet_enabled: bool = os.getenv("NASA_EONET_ENABLED", "true").lower() == "true"
+    open_meteo_enabled: bool = os.getenv("OPEN_METEO_ENABLED", "true").lower() == "true"
+
     # --- Database ---
     database_url: str = os.getenv(
         "DATABASE_URL",

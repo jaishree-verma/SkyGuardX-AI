@@ -3,6 +3,7 @@ import GlossaryTooltip from "./GlossaryTooltip.jsx";
 import SpaceRocketHero3D from "./SpaceRocketHero3D.jsx";
 import SkyGuardDefenseShowcase from "./SkyGuardDefenseShowcase.jsx";
 import AppFooter from "./AppFooter.jsx";
+import Card3D from "./Card3D.jsx";
 
 export default function LandingPage({
   onCheckSatellite,
@@ -347,20 +348,20 @@ export default function LandingPage({
             </div>
           </div>
 
-          {/* Intelligence Preview Mock Card */}
-          <div
-            className="hover-lift"
-            style={{
-              background: "var(--bg)",
-              border: "1.5px solid rgba(230, 57, 70, 0.4)",
-              borderRadius: 8,
-              padding: "22px 26px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-              display: "flex",
-              flexDirection: "column",
-              gap: 18,
-            }}
-          >
+          {/* Intelligence Preview 3D Interactive Card */}
+          <Card3D maxTilt={6} elevation={24} scale={1.01}>
+            <div
+              style={{
+                background: "var(--bg)",
+                border: "1.5px solid rgba(230, 57, 70, 0.4)",
+                borderRadius: 8,
+                padding: "22px 26px",
+                boxShadow: "0 14px 40px rgba(0,0,0,0.6), 0 0 20px rgba(230, 57, 70, 0.15)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 18,
+              }}
+            >
             {/* Header row */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -452,6 +453,7 @@ export default function LandingPage({
               </button>
             </div>
           </div>
+          </Card3D>
         </div>
       </section>
 
@@ -471,56 +473,74 @@ export default function LandingPage({
           <em> Is something wrong? How serious is it? What changed? Why did the risk increase? Which event needs attention first?</em>
         </p>
 
-        {/* Visual Transformation Flow */}
-        <div
-          style={{
-            background: "var(--panel)",
-            border: "1px solid var(--border)",
-            borderRadius: 8,
-            padding: "24px",
-            display: "flex",
-            justifyContent: "space-around",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 14,
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-          }}
-        >
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 16 }}>📡</div>
-            <div style={{ fontWeight: 700, color: "var(--text)", marginTop: 4 }}>RAW DATA</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Telemetry & Orbits</div>
-          </div>
-          <span style={{ color: "var(--text-muted)", fontSize: 16 }}>→</span>
+        {/* Visual Transformation Flow inside Card3D */}
+        <Card3D maxTilt={5} elevation={14} scale={1.01}>
+          <div
+            style={{
+              background: "var(--panel)",
+              border: "1px solid var(--border)",
+              borderRadius: 8,
+              padding: "24px",
+              boxShadow: "0 8px 28px rgba(0,0,0,0.5)",
+              position: "relative",
+            }}
+          >
+            <div
+              className="laser-pipeline"
+              style={{
+                height: 2,
+                width: "100%",
+                borderRadius: 1,
+                marginBottom: 20,
+              }}
+            />
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 14,
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+              }}
+            >
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 20 }}>📡</div>
+                <div style={{ fontWeight: 700, color: "var(--text)", marginTop: 4 }}>RAW DATA</div>
+                <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Telemetry & Orbits</div>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: 16 }}>→</span>
 
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 16 }}>🤖</div>
-            <div style={{ fontWeight: 700, color: "var(--blue)", marginTop: 4 }}>AI DETECTION</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Isolation Forest</div>
-          </div>
-          <span style={{ color: "var(--text-muted)", fontSize: 16 }}>→</span>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 20 }}>🤖</div>
+                <div style={{ fontWeight: 700, color: "var(--blue)", marginTop: 4 }}>AI DETECTION</div>
+                <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Isolation Forest</div>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: 16 }}>→</span>
 
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 16 }}>🔎</div>
-            <div style={{ fontWeight: 700, color: "var(--teal)", marginTop: 4 }}>EXPLANATION</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Baseline Deltas</div>
-          </div>
-          <span style={{ color: "var(--text-muted)", fontSize: 16 }}>→</span>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 20 }}>🔎</div>
+                <div style={{ fontWeight: 700, color: "var(--teal)", marginTop: 4 }}>EXPLANATION</div>
+                <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Baseline Deltas</div>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: 16 }}>→</span>
 
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 16 }}>📊</div>
-            <div style={{ fontWeight: 700, color: "#ff9f1c", marginTop: 4 }}>RISK SCORE</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Calibrated 0-100%</div>
-          </div>
-          <span style={{ color: "var(--text-muted)", fontSize: 16 }}>→</span>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 20 }}>📊</div>
+                <div style={{ fontWeight: 700, color: "#ff9f1c", marginTop: 4 }}>RISK SCORE</div>
+                <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Calibrated 0-100%</div>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: 16 }}>→</span>
 
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 16 }}>🚨</div>
-            <div style={{ fontWeight: 700, color: "#e63946", marginTop: 4 }}>ALERT</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Human Sign-off</div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 20 }}>🚨</div>
+                <div style={{ fontWeight: 700, color: "#e63946", marginTop: 4 }}>ALERT</div>
+                <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Human Sign-off</div>
+              </div>
+            </div>
           </div>
-        </div>
+        </Card3D>
       </section>
 
       {/* ========================================================================= */}
@@ -654,27 +674,30 @@ export default function LandingPage({
               desc: "No black-box decisions. Every generated alert reveals the structured evidence checklist, exact baseline percentage deviations, and confidence levels.",
             },
           ].map((card, i) => (
-            <div
-              key={i}
-              className="hover-lift"
-              style={{
-                background: "var(--panel)",
-                border: "1px solid var(--border)",
-                borderRadius: 6,
-                padding: "24px 22px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <div style={{ fontSize: 26 }}>{card.icon}</div>
-              <div style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", letterSpacing: "0.02em" }}>
-                {card.title}
+            <Card3D key={i} maxTilt={10} elevation={16} scale={1.03}>
+              <div
+                style={{
+                  background: "var(--panel)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 8,
+                  padding: "24px 22px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  height: "100%",
+                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
+                  transition: "border-color 0.2s ease",
+                }}
+              >
+                <div style={{ fontSize: 28 }}>{card.icon}</div>
+                <div style={{ fontWeight: 800, fontSize: 14, color: "var(--text)", letterSpacing: "0.02em" }}>
+                  {card.title}
+                </div>
+                <div style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.55 }}>
+                  {card.desc}
+                </div>
               </div>
-              <div style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                {card.desc}
-              </div>
-            </div>
+            </Card3D>
           ))}
         </div>
       </section>
@@ -704,6 +727,18 @@ export default function LandingPage({
             </div>
           </div>
 
+          {/* Laser Pipeline Indicator Bar */}
+          <div
+            className="laser-pipeline"
+            style={{
+              height: 3,
+              width: "100%",
+              borderRadius: 2,
+              marginBottom: 20,
+              boxShadow: "0 0 10px rgba(59, 130, 246, 0.6)",
+            }}
+          />
+
           <div
             style={{
               display: "grid",
@@ -720,30 +755,32 @@ export default function LandingPage({
               { num: "06", title: "EXPLAIN", desc: "The platform isolates percentage baseline deviations to explain WHY." },
               { num: "07", title: "ALERT", desc: "Operators receive a real-time intelligence warning for human review." },
             ].map((st) => (
-              <div
-                key={st.num}
-                className="hover-lift"
-                style={{
-                  background: "var(--panel-raised)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 6,
-                  padding: "20px 18px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 900, color: "var(--blue)" }}>
-                    {st.num}
-                  </span>
-                  <span style={{ fontSize: 9.5, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
-                    STEP
-                  </span>
+              <Card3D key={st.num} maxTilt={8} elevation={12} scale={1.03}>
+                <div
+                  style={{
+                    background: "var(--panel-raised)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    padding: "20px 18px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    height: "100%",
+                    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 900, color: "var(--blue)" }}>
+                      {st.num}
+                    </span>
+                    <span style={{ fontSize: 9.5, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                      STEP
+                    </span>
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: "var(--text)" }}>{st.title}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.45 }}>{st.desc}</div>
                 </div>
-                <div style={{ fontWeight: 800, fontSize: 14, color: "var(--text)" }}>{st.title}</div>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.45 }}>{st.desc}</div>
-              </div>
+              </Card3D>
             ))}
           </div>
         </div>
@@ -774,79 +811,91 @@ export default function LandingPage({
           }}
         >
           {/* Left Column: Observed Data */}
-          <div
-            style={{
-              background: "var(--panel)",
-              border: "1px solid var(--border)",
-              borderRadius: 6,
-              padding: "22px 20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-            }}
-          >
-            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", fontWeight: 700 }}>
-              1. OBSERVED DATA
+          <Card3D maxTilt={7} elevation={16} scale={1.02}>
+            <div
+              style={{
+                background: "var(--panel)",
+                border: "1px solid var(--border)",
+                borderRadius: 8,
+                padding: "22px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                height: "100%",
+                boxShadow: "0 4px 18px rgba(0,0,0,0.4)",
+              }}
+            >
+              <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", fontWeight: 700 }}>
+                1. OBSERVED DATA
+              </div>
+              <div style={{ fontSize: 12.5, fontFamily: "var(--font-mono)", display: "flex", flexDirection: "column", gap: 6 }}>
+                <div>• Temperature: <strong style={{ color: "#ff9f1c" }}>71.0°C</strong> (baseline ~24.5°C)</div>
+                <div>• Battery Level: <strong style={{ color: "#e63946" }}>42.0%</strong> (baseline ~91.0%)</div>
+                <div>• Power Consumption: <strong style={{ color: "#ff9f1c" }}>94.0W</strong> (baseline ~62.0W)</div>
+                <div>• Signal Strength: <strong style={{ color: "#f5c84c" }}>61.0%</strong> (baseline ~96.0%)</div>
+                <div>• Proximity: <strong style={{ color: "#e63946" }}>0.72 km</strong> to DEB-2098</div>
+              </div>
             </div>
-            <div style={{ fontSize: 12.5, fontFamily: "var(--font-mono)", display: "flex", flexDirection: "column", gap: 6 }}>
-              <div>• Temperature: <strong style={{ color: "#ff9f1c" }}>71.0°C</strong> (baseline ~24.5°C)</div>
-              <div>• Battery Level: <strong style={{ color: "#e63946" }}>42.0%</strong> (baseline ~91.0%)</div>
-              <div>• Power Consumption: <strong style={{ color: "#ff9f1c" }}>94.0W</strong> (baseline ~62.0W)</div>
-              <div>• Signal Strength: <strong style={{ color: "#f5c84c" }}>61.0%</strong> (baseline ~96.0%)</div>
-              <div>• Proximity: <strong style={{ color: "#e63946" }}>0.72 km</strong> to DEB-2098</div>
-            </div>
-          </div>
+          </Card3D>
 
           {/* Center Column: AI Analysis */}
-          <div
-            style={{
-              background: "var(--panel)",
-              border: "1px solid var(--blue)",
-              borderRadius: 6,
-              padding: "22px 20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-            }}
-          >
-            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--blue)", fontWeight: 700 }}>
-              2. AI MODEL ANALYSIS
+          <Card3D maxTilt={7} elevation={16} scale={1.02}>
+            <div
+              style={{
+                background: "var(--panel)",
+                border: "1px solid var(--blue)",
+                borderRadius: 8,
+                padding: "22px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                height: "100%",
+                boxShadow: "0 4px 20px rgba(59, 130, 246, 0.2)",
+              }}
+            >
+              <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--blue)", fontWeight: 700 }}>
+                2. AI MODEL ANALYSIS
+              </div>
+              <div style={{ fontSize: 12.5, fontFamily: "var(--font-mono)", display: "flex", flexDirection: "column", gap: 6 }}>
+                <div>• Algorithm: <strong>Isolation Forest</strong></div>
+                <div>• Telemetry Anomaly: <span style={{ color: "#ff9f1c", fontWeight: 700 }}>HIGH</span></div>
+                <div>• Conjunction Risk: <span style={{ color: "#e63946", fontWeight: 700 }}>HIGH</span></div>
+                <div>• Model: <strong>telemetry-anomaly-v1</strong></div>
+                <div>• Confidence Rating: <strong>94.0%</strong></div>
+              </div>
             </div>
-            <div style={{ fontSize: 12.5, fontFamily: "var(--font-mono)", display: "flex", flexDirection: "column", gap: 6 }}>
-              <div>• Algorithm: <strong>Isolation Forest</strong></div>
-              <div>• Telemetry Anomaly: <span style={{ color: "#ff9f1c", fontWeight: 700 }}>HIGH</span></div>
-              <div>• Conjunction Risk: <span style={{ color: "#e63946", fontWeight: 700 }}>HIGH</span></div>
-              <div>• Model: <strong>telemetry-anomaly-v1</strong></div>
-              <div>• Confidence Rating: <strong>94.0%</strong></div>
-            </div>
-          </div>
+          </Card3D>
 
           {/* Right Column: Intelligence & Evidence */}
-          <div
-            style={{
-              background: "rgba(230, 57, 70, 0.08)",
-              border: "1px solid rgba(230, 57, 70, 0.4)",
-              borderRadius: 6,
-              padding: "22px 20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-            }}
-          >
-            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#e63946", fontWeight: 700 }}>
-              3. EXPLAINABLE INTELLIGENCE
+          <Card3D maxTilt={7} elevation={18} scale={1.02}>
+            <div
+              style={{
+                background: "rgba(230, 57, 70, 0.08)",
+                border: "1px solid rgba(230, 57, 70, 0.4)",
+                borderRadius: 8,
+                padding: "22px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                height: "100%",
+                boxShadow: "0 6px 24px rgba(230, 57, 70, 0.2)",
+              }}
+            >
+              <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#e63946", fontWeight: 700 }}>
+                3. EXPLAINABLE INTELLIGENCE
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#e63946" }}>
+                OVERALL RISK: 89% (HIGH RISK)
+              </div>
+              <div style={{ fontSize: 11.5, color: "var(--text)", lineHeight: 1.45 }}>
+                ✓ Temperature spike (+190% above baseline)<br />
+                ✓ Power consumption surge (+52% draw)<br />
+                ✓ Rapid battery degradation (-54% capacity)<br />
+                ✓ Conjunction: 0.72 km miss distance with DEB-2098<br />
+                <strong>Action: Operator review required.</strong>
+              </div>
             </div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: "#e63946" }}>
-              OVERALL RISK: 89% (HIGH RISK)
-            </div>
-            <div style={{ fontSize: 11.5, color: "var(--text)", lineHeight: 1.45 }}>
-              ✓ Temperature spike (+190% above baseline)<br />
-              ✓ Power consumption surge (+52% draw)<br />
-              ✓ Rapid battery degradation (-54% capacity)<br />
-              ✓ Conjunction: 0.72 km miss distance with DEB-2098<br />
-              <strong>Action: Operator review required.</strong>
-            </div>
-          </div>
+          </Card3D>
         </div>
       </section>
 
@@ -1006,136 +1055,145 @@ export default function LandingPage({
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 18 }}>
             {/* Normal Card */}
-            <div
-              className="hover-lift"
-              style={{
-                background: "var(--panel-raised)",
-                border: "1px solid rgba(46, 196, 182, 0.3)",
-                borderRadius: 6,
-                padding: "22px 20px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 18 }}>🟢</span>
-                <span style={{ fontSize: 11, fontWeight: 800, color: "var(--teal)", fontFamily: "var(--font-mono)" }}>
-                  NORMAL
-                </span>
-              </div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>SAT-1001</div>
-              <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
-                Risk: <strong style={{ color: "var(--teal)" }}>8%</strong> · Health: <strong>97%</strong> · Confidence: <strong>96%</strong>
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.45 }}>
-                No significant anomaly detected. Telemetry metrics remain securely within expected baseline envelopes.
-              </div>
-              <button
-                onClick={() => onCheckSatellite("SAT-1001")}
+            <Card3D maxTilt={8} elevation={14} scale={1.03}>
+              <div
                 style={{
-                  background: "transparent",
-                  border: "1px solid var(--border)",
-                  color: "var(--teal)",
-                  padding: "6px 12px",
-                  borderRadius: 4,
-                  fontSize: 11,
-                  fontFamily: "var(--font-mono)",
-                  cursor: "pointer",
-                  marginTop: "auto",
+                  background: "var(--panel-raised)",
+                  border: "1px solid rgba(46, 196, 182, 0.35)",
+                  borderRadius: 8,
+                  padding: "22px 20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  height: "100%",
+                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.35)",
                 }}
               >
-                Inspect SAT-1001 →
-              </button>
-            </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 18 }}>🟢</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "var(--teal)", fontFamily: "var(--font-mono)" }}>
+                    NORMAL
+                  </span>
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>SAT-1001</div>
+                <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                  Risk: <strong style={{ color: "var(--teal)" }}>8%</strong> · Health: <strong>97%</strong> · Confidence: <strong>96%</strong>
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.45 }}>
+                  No significant anomaly detected. Telemetry metrics remain securely within expected baseline envelopes.
+                </div>
+                <button
+                  onClick={() => onCheckSatellite("SAT-1001")}
+                  style={{
+                    background: "transparent",
+                    border: "1px solid var(--border)",
+                    color: "var(--teal)",
+                    padding: "6px 12px",
+                    borderRadius: 4,
+                    fontSize: 11,
+                    fontFamily: "var(--font-mono)",
+                    cursor: "pointer",
+                    marginTop: "auto",
+                  }}
+                >
+                  Inspect SAT-1001 →
+                </button>
+              </div>
+            </Card3D>
 
             {/* Warning Card */}
-            <div
-              className="hover-lift"
-              style={{
-                background: "var(--panel-raised)",
-                border: "1px solid rgba(245, 200, 76, 0.3)",
-                borderRadius: 6,
-                padding: "22px 20px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 18 }}>🟡</span>
-                <span style={{ fontSize: 11, fontWeight: 800, color: "#f5c84c", fontFamily: "var(--font-mono)" }}>
-                  WARNING
-                </span>
-              </div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>SAT-1003</div>
-              <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
-                Risk: <strong style={{ color: "#f5c84c" }}>42%</strong> · Health: <strong>78%</strong> · Confidence: <strong>91%</strong>
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.45 }}>
-                Potential abnormal behavior detected. Mild thermal rise (~38.5°C) and battery capacity drift noted.
-              </div>
-              <button
-                onClick={() => onCheckSatellite("SAT-1003")}
+            <Card3D maxTilt={8} elevation={14} scale={1.03}>
+              <div
                 style={{
-                  background: "transparent",
-                  border: "1px solid var(--border)",
-                  color: "#f5c84c",
-                  padding: "6px 12px",
-                  borderRadius: 4,
-                  fontSize: 11,
-                  fontFamily: "var(--font-mono)",
-                  cursor: "pointer",
-                  marginTop: "auto",
+                  background: "var(--panel-raised)",
+                  border: "1px solid rgba(245, 200, 76, 0.4)",
+                  borderRadius: 8,
+                  padding: "22px 20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  height: "100%",
+                  boxShadow: "0 4px 20px rgba(245, 200, 76, 0.15)",
                 }}
               >
-                Inspect SAT-1003 →
-              </button>
-            </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 18 }}>🟡</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#f5c84c", fontFamily: "var(--font-mono)" }}>
+                    WARNING
+                  </span>
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>SAT-1003</div>
+                <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                  Risk: <strong style={{ color: "#f5c84c" }}>42%</strong> · Health: <strong>78%</strong> · Confidence: <strong>91%</strong>
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.45 }}>
+                  Potential abnormal behavior detected. Mild thermal rise (~38.5°C) and battery capacity drift noted.
+                </div>
+                <button
+                  onClick={() => onCheckSatellite("SAT-1003")}
+                  style={{
+                    background: "transparent",
+                    border: "1px solid var(--border)",
+                    color: "#f5c84c",
+                    padding: "6px 12px",
+                    borderRadius: 4,
+                    fontSize: 11,
+                    fontFamily: "var(--font-mono)",
+                    cursor: "pointer",
+                    marginTop: "auto",
+                  }}
+                >
+                  Inspect SAT-1003 →
+                </button>
+              </div>
+            </Card3D>
 
             {/* High Risk Card */}
-            <div
-              className="hover-lift"
-              style={{
-                background: "var(--panel-raised)",
-                border: "1px solid rgba(230, 57, 70, 0.4)",
-                borderRadius: 6,
-                padding: "22px 20px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 18 }}>🔴</span>
-                <span style={{ fontSize: 11, fontWeight: 800, color: "#e63946", fontFamily: "var(--font-mono)" }}>
-                  HIGH RISK
-                </span>
-              </div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>SAT-1042</div>
-              <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
-                Risk: <strong style={{ color: "#e63946" }}>89%</strong> · Health: <strong>82%</strong> · Confidence: <strong>94%</strong>
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.45 }}>
-                Severe multivariate anomaly (71°C) and orbital conjunction proximity (0.72 km) detected. Human review required.
-              </div>
-              <button
-                onClick={() => onCheckSatellite("SAT-1042")}
+            <Card3D maxTilt={8} elevation={16} scale={1.03}>
+              <div
                 style={{
-                  background: "transparent",
-                  border: "1px solid rgba(230, 57, 70, 0.4)",
-                  color: "#e63946",
-                  padding: "6px 12px",
-                  borderRadius: 4,
-                  fontSize: 11,
-                  fontFamily: "var(--font-mono)",
-                  cursor: "pointer",
-                  marginTop: "auto",
+                  background: "var(--panel-raised)",
+                  border: "1px solid rgba(230, 57, 70, 0.5)",
+                  borderRadius: 8,
+                  padding: "22px 20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  height: "100%",
+                  boxShadow: "0 6px 24px rgba(230, 57, 70, 0.25)",
                 }}
               >
-                Inspect SAT-1042 →
-              </button>
-            </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 18 }}>🔴</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#e63946", fontFamily: "var(--font-mono)" }}>
+                    HIGH RISK
+                  </span>
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>SAT-1042</div>
+                <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                  Risk: <strong style={{ color: "#e63946" }}>89%</strong> · Health: <strong>82%</strong> · Confidence: <strong>94%</strong>
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.45 }}>
+                  Severe multivariate anomaly (71°C) and orbital conjunction proximity (0.72 km) detected. Human review required.
+                </div>
+                <button
+                  onClick={() => onCheckSatellite("SAT-1042")}
+                  style={{
+                    background: "transparent",
+                    border: "1px solid rgba(230, 57, 70, 0.5)",
+                    color: "#e63946",
+                    padding: "6px 12px",
+                    borderRadius: 4,
+                    fontSize: 11,
+                    fontFamily: "var(--font-mono)",
+                    cursor: "pointer",
+                    marginTop: "auto",
+                  }}
+                >
+                  Inspect SAT-1042 →
+                </button>
+              </div>
+            </Card3D>
           </div>
         </div>
       </section>
@@ -1282,62 +1340,75 @@ export default function LandingPage({
           FROM SPACE INTELLIGENCE TO TRANSACTIONAL DECISIONS
         </h2>
 
-        {/* Pipeline Visual */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 12,
-            flexWrap: "wrap",
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            margin: "24px 0",
-          }}
-        >
-          <span className="pill">SPACE DATA</span>
-          <span>→</span>
-          <span className="pill">AI ANALYSIS</span>
-          <span>→</span>
-          <span className="pill" style={{ color: "var(--amber)" }}>SPACE RISK</span>
-          <span>→</span>
-          <span className="pill" style={{ color: "var(--blue)" }}>TRANSACTIONAL INTELLIGENCE</span>
-          <span>→</span>
-          <span
+        {/* Pipeline Visual inside Card3D */}
+        <Card3D maxTilt={5} elevation={12} scale={1.01} style={{ margin: "20px auto", maxWidth: 840 }}>
+          <div
             style={{
-              padding: "4px 10px",
-              borderRadius: 4,
-              background: "rgba(76, 154, 255, 0.2)",
-              color: "var(--blue)",
-              fontWeight: 700,
-              border: "1px solid var(--blue)",
-            }}
-          >
-            IBM Z ADAPTER
-          </span>
-        </div>
-
-        <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6, maxWidth: 720, margin: "0 auto 16px" }}>
-          SKYGUARD XAI is designed so that real-time space risk events can eventually become inputs to transactional
-          systems responsible for critical decisions. In-process isolation bridges real-time Python AI models to
-          transactional scoring boundaries.
-        </p>
-
-        <div style={{ display: "inline-block" }}>
-          <span
-            style={{
-              fontSize: 11,
-              fontFamily: "var(--font-mono)",
-              color: "var(--text-muted)",
               background: "var(--panel)",
-              padding: "4px 12px",
-              borderRadius: 20,
-              border: "1px solid var(--border)",
+              border: "1px solid rgba(59, 130, 246, 0.35)",
+              borderRadius: 8,
+              padding: "26px 28px",
+              boxShadow: "0 8px 30px rgba(0, 0, 0, 0.45)",
             }}
           >
-            INTEGRATION STATUS: <strong>IBM Z INTEGRATION READY</strong> (Simulated In-Process Boundary)
-          </span>
-        </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 12,
+                flexWrap: "wrap",
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                marginBottom: 20,
+              }}
+            >
+              <span className="pill">SPACE DATA</span>
+              <span>→</span>
+              <span className="pill">AI ANALYSIS</span>
+              <span>→</span>
+              <span className="pill" style={{ color: "var(--amber)" }}>SPACE RISK</span>
+              <span>→</span>
+              <span className="pill" style={{ color: "var(--blue)" }}>TRANSACTIONAL INTELLIGENCE</span>
+              <span>→</span>
+              <span
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 4,
+                  background: "rgba(59, 130, 246, 0.25)",
+                  color: "var(--blue)",
+                  fontWeight: 700,
+                  border: "1px solid var(--blue)",
+                  boxShadow: "0 0 10px rgba(59, 130, 246, 0.4)",
+                }}
+              >
+                IBM Z ADAPTER
+              </span>
+            </div>
+
+            <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, maxWidth: 720, margin: "0 auto 16px" }}>
+              SKYGUARD XAI is designed so that real-time space risk events can eventually become inputs to transactional
+              systems responsible for critical decisions. In-process isolation bridges real-time Python AI models to
+              transactional scoring boundaries.
+            </p>
+
+            <div style={{ display: "inline-block" }}>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--text-muted)",
+                  background: "var(--panel-raised)",
+                  padding: "6px 14px",
+                  borderRadius: 20,
+                  border: "1px solid var(--border)",
+                }}
+              >
+                INTEGRATION STATUS: <strong style={{ color: "var(--blue-light)" }}>IBM Z INTEGRATION READY</strong> (Simulated In-Process Boundary)
+              </span>
+            </div>
+          </div>
+        </Card3D>
       </section>
 
       {/* ========================================================================= */}
