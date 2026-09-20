@@ -1,0 +1,10 @@
+{
+  "name": "skyguard-x-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix apps/web run dev",
+    "web": "npm --prefix apps/web run dev",
+    "api": ".venv\\Scripts\\uvicorn.exe apps.api.main:app --host 0.0.0.0 --port 8000"
+  }
+}

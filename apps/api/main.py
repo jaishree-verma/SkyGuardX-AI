@@ -46,6 +46,7 @@ from services.cascade_engine.cascade import build_wildfire_cascade_graph, propag
 from services.scenario_engine import whatif
 from services.decision_engine import decision as decision_engine
 from services.explanation_service import explain as explanation_service
+from services.convergence_engine import convergence as convergence_engine
 from infra_ibm_z_adapter import boundary, transactional_score  # IBM Z boundary adapter
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -312,6 +313,51 @@ async def _run_earth_hazard_pipeline(event: CanonicalEvent) -> None:
         await manager.broadcast("recommendation", recommendation)
         _write_audit(actor="system", recommendation_id=rec_id, event={"type": "recommendation_generated"})
 
+    # ---------------------------------------------------------------------------
+    # CONVERGENCE CHECK: run after every earth-hazard pipeline completion.
+    # Checks if any tracked satellite + this earth hazard create a compound event.
+    # ---------------------------------------------------------------------------
+    for sat_id, space_risk_data in LATEST_SPACE_RISK.items():
+        sat_loc = None
+        sat_state = tracker._satellites.get(sat_id)
+        if sat_state:
+            sat_loc = {"latitude": sat_state.latitude, "longitude": sat_state.longitude}
+
+        # Prepare a scorable earth hazard dict from the pipeline output
+        earth_data = {
+            "risk_score": risk.risk_score,
+            "status": risk.status,
+            "hazard_type": hazard_record.get("hazard_type", "wildfire"),
+            "centroid_lat": hazard_record.get("centroid_lat"),
+            "centroid_lon": hazard_record.get("centroid_lon"),
+            "area_km2": hazard_record.get("area_km2", 1000.0),
+            "affected_population": impact_obj.affected_population,
+        }
+
+        convergence_event = convergence_engine.detect_convergence(
+            space_risk=space_risk_data,
+            earth_hazard=earth_data,
+            satellite_location=sat_loc,
+        )
+
+        if convergence_event:
+            # Generate Gemini compound threat briefing
+            conv_evidence = explanation_service.build_convergence_evidence_payload(
+                convergence_event,
+                space_risk_data,
+                earth_data,
+            )
+            conv_brief = explanation_service.generate_convergence_explanation(conv_evidence)
+            convergence_event["gemini_brief"] = conv_brief
+
+            convergence_engine.record_convergence(convergence_event)
+            await manager.broadcast("convergence_alert", convergence_event)
+            logger.info(
+                "CONVERGENCE BROADCAST: %s CTI=%.3f",
+                convergence_event["convergence_id"],
+                convergence_event["compound_threat_index"],
+            )
+            break  # One convergence alert per hazard event is sufficient
 
 def _write_audit(actor: str, recommendation_id: str | None, event: dict) -> None:
     try:
@@ -665,6 +711,49 @@ async def audit(recommendation_id: str):
             ]
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"audit store unavailable: {exc}")
+
+
+# ---------------------------------------------------------------------------
+# Convergence Engine REST endpoints
+# ---------------------------------------------------------------------------
+@app.get("/api/v1/convergence/status")
+async def convergence_status():
+    """Returns the current convergence engine status and thresholds."""
+    return convergence_engine.get_convergence_status()
+
+
+@app.get("/api/v1/convergence/alerts")
+async def convergence_alerts(limit: int = 20):
+    """Returns the most recent convergence alert events (newest first)."""
+    log = convergence_engine.get_convergence_log()
+    return {"total": len(log), "alerts": log[:limit]}
+
+
+@app.post("/api/v1/convergence/alerts/{convergence_id}/dismiss")
+async def dismiss_convergence_alert(convergence_id: str, req: ApprovalRequest):
+    """Record operator dismissal of a convergence alert into the audit trail."""
+    log = convergence_engine.get_convergence_log()
+    target = next((e for e in log if e["convergence_id"] == convergence_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail="convergence alert not found")
+
+    _write_audit(
+        actor=req.approver,
+        recommendation_id=None,
+        event={
+            "type": "convergence_alert_dismissed",
+            "convergence_id": convergence_id,
+            "decision": req.decision,
+            "notes": req.notes,
+            "compound_threat_index": target.get("compound_threat_index"),
+        },
+    )
+    await manager.broadcast("convergence_dismissed", {
+        "convergence_id": convergence_id,
+        "dismissed_by": req.approver,
+        "decision": req.decision,
+    })
+    return {"status": "dismissed", "convergence_id": convergence_id}
 
 
 # ---------------------------------------------------------------------------

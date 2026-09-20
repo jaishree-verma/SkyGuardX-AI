@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { api } from "../api/client.js";
+import AIThreatBriefing from "./AIThreatBriefing.jsx";
 
 export default function DecisionPanel({ recommendations, scenarioResults, onApproved }) {
   const [busy, setBusy] = useState(null);
@@ -79,13 +80,15 @@ export default function DecisionPanel({ recommendations, scenarioResults, onAppr
               border: "1px solid var(--blue)", borderRadius: 4, padding: 12,
               background: "rgba(76,154,255,0.06)", marginBottom: 10,
             }}>
-              <div className="mono" style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+              <div className="mono" style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
                 {latest.action_type} <span style={{ color: "var(--text-muted)" }}>· conf {latest.confidence?.toFixed(2)}</span>
               </div>
-              <div style={{ fontSize: 12.5, lineHeight: 1.5, color: "var(--text)" }}>
-                {latest.explanation?.text}
-              </div>
-              <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
+              {/* Feature 1: Structured Gemini AI Threat Briefing */}
+              <AIThreatBriefing
+                explanation={latest.explanation}
+                isLoading={false}
+              />
+              <div style={{ marginTop: 10, display: "flex", gap: 6 }}>
                 <span className="pill">{latest.explanation?.mode}</span>
                 <span className="pill">requires human approval</span>
                 <span className="pill">{latest.approval_state}</span>
