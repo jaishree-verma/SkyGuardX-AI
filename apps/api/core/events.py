@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class EventType(str, Enum):
@@ -29,6 +29,7 @@ class EventType(str, Enum):
     EARTH_HAZARD_WILDFIRE = "earth_hazard_wildfire"
     EARTH_HAZARD_FLOOD = "earth_hazard_flood"
     INFRASTRUCTURE_CHANGE = "infrastructure_change"
+    CONVERGENCE_ALERT = "convergence_alert"
 
 
 class DataQualityStatus(str, Enum):
@@ -110,6 +111,8 @@ class CanonicalEvent(BaseModel):
 
 class RiskObject(BaseModel):
     """Output of Space Risk / Earth Risk services."""
+    model_config = ConfigDict(protected_namespaces=())
+
     entity_id: str
     risk_type: str  # "health" | "conjunction" | "unified_space_risk"
     risk_score: float  # 0..1
@@ -125,6 +128,8 @@ class RiskObject(BaseModel):
 
 class SpaceRiskEvent(BaseModel):
     """Standardized Layer 1 output object ready for future Layer 2 (Earth Impact) consumption."""
+    model_config = ConfigDict(protected_namespaces=())
+
     space_event_id: str
     entity_id: str
     event_type: str = "SPACE_RISK"
@@ -160,3 +165,31 @@ class ImpactObject(BaseModel):
     affected_facilities: list[dict[str, Any]] = Field(default_factory=list)
     accessibility_index: float  # 0..1, 1 = fully accessible
     computed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ConvergenceAlert(BaseModel):
+    """Fired when a satellite space risk + Earth hazard overlap geographically.
+
+    compound_threat_index = sqrt(space_risk_score * earth_risk_score).
+    This preserves extremes and correctly models the compound disaster scenario.
+    """
+    convergence_id: str = Field(default_factory=lambda: f"CVG-{uuid.uuid4().hex[:8].upper()}")
+    event_type: str = "CONVERGENCE_ALERT"
+    compound_threat_index: float          # 0..1, geometric mean of both risks
+    severity: str                          # LOW | MEDIUM | HIGH | CRITICAL
+    space_entity_id: str
+    space_risk_score: float
+    space_risk_status: str
+    space_top_evidence: list[str] = Field(default_factory=list)
+    earth_hazard_type: str
+    earth_risk_score: float
+    earth_risk_status: str
+    spatial_overlap_km2: float
+    distance_km: Optional[float] = None
+    convergence_zone: Optional[dict] = None
+    affected_population: int = 0
+    requires_human_approval: bool = True
+    autonomous_action_allowed: bool = False
+    detected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    source: str = "convergence_engine_v1"
+    gemini_brief: Optional[dict] = None    # Populated by explanation service

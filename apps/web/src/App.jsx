@@ -12,6 +12,7 @@ import EventsView from "./components/EventsView.jsx";
 import AnalyticsView from "./components/AnalyticsView.jsx";
 import AboutPage from "./components/AboutPage.jsx";
 import AlertBanner from "./components/AlertBanner.jsx";
+import ConvergenceAlert from "./components/ConvergenceAlert.jsx";
 
 function AppContent() {
   const {
@@ -24,6 +25,7 @@ function AppContent() {
     conjunction,
     conjunctions,
     alerts,
+    convergenceAlerts,
   } = useNexusSocket();
 
   const { showToast } = useToast();
@@ -33,6 +35,9 @@ function AppContent() {
   const [selectedSatId, setSelectedSatId] = useState("SAT-1042");
   const [activeAlerts, setActiveAlerts] = useState([]);
   const [demoStatus, setDemoStatus] = useState("idle");
+  // Feature 2: convergence alert overlay
+  const [activeConvergenceAlert, setActiveConvergenceAlert] = useState(null);
+  const [dismissedConvergenceIds, setDismissedConvergenceIds] = useState(new Set());
 
   // Parse Hash Route
   const parseRouteFromHash = useCallback(() => {
@@ -126,6 +131,19 @@ function AppContent() {
       });
     }
   }, [alerts, showToast]);
+
+  // Feature 2: show convergence alert overlay when new one arrives
+  useEffect(() => {
+    if (!convergenceAlerts || convergenceAlerts.length === 0) return;
+    const newest = convergenceAlerts[0];
+    if (newest && !dismissedConvergenceIds.has(newest.convergence_id)) {
+      setActiveConvergenceAlert(newest);
+      showToast(
+        `⚡ CONVERGENCE ALERT: CTI ${(newest.compound_threat_index * 100).toFixed(0)}% — ${newest.severity} severity`,
+        "danger"
+      );
+    }
+  }, [convergenceAlerts]);
 
   // Initial fetch of active alerts and objects
   useEffect(() => {
@@ -296,6 +314,17 @@ function AppContent() {
 
       {/* 3. Floating Real-Time Alert Toast Notification */}
       <AlertBanner alerts={activeAlerts} onDismiss={handleDismissAlert} />
+
+      {/* Feature 2: Multi-Hazard Convergence Alert Overlay */}
+      {activeConvergenceAlert && (
+        <ConvergenceAlert
+          alert={activeConvergenceAlert}
+          onDismiss={() => {
+            setDismissedConvergenceIds((prev) => new Set([...prev, activeConvergenceAlert.convergence_id]));
+            setActiveConvergenceAlert(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -36,7 +36,8 @@ class ConnectionManager:
         logger.info("ws connected, total=%d", len(self._connections))
         # Replay recent history so a newly-opened dashboard isn't blank.
         for msg in self._recent[-50:]:
-            await ws.send_text(json.dumps(msg))
+            await ws.send_text(json.dumps(msg, default=str))
+
 
     async def disconnect(self, ws: WebSocket) -> None:
         async with self._lock:

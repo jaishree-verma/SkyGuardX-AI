@@ -17,6 +17,7 @@ export function useNexusSocket() {
     conjunction: null,
     conjunctions: {},
     alerts: [],
+    convergenceAlerts: [],
   });
   const wsRef = useRef(null);
   const attemptRef = useRef(0);
@@ -90,6 +91,18 @@ export function useNexusSocket() {
                 return {
                   ...prev,
                   alerts: [alert, ...prev.alerts.filter((a) => a.alert_id !== alert.alert_id)].slice(0, 20),
+                };
+              }
+              case "convergence_alert": {
+                const ca = msg.payload;
+                return {
+                  ...prev,
+                  convergenceAlerts: [
+                    ca,
+                    ...prev.convergenceAlerts.filter(
+                      (a) => a.convergence_id !== ca.convergence_id
+                    ),
+                  ].slice(0, 10),
                 };
               }
               default:

@@ -48,7 +48,10 @@ async def fetch_osm_assets(min_lat: float, min_lon: float, max_lat: float, max_l
         import httpx
 
         query = _build_query(min_lat, min_lon, max_lat, max_lon)
-        async with httpx.AsyncClient(timeout=timeout_s) as client:
+        headers = {
+            "User-Agent": "SkyGuardX-DecisionIntelligence/1.0 (space-earth-decision-prototype; research@skyguardx.org)"
+        }
+        async with httpx.AsyncClient(timeout=timeout_s, headers=headers) as client:
             resp = await client.post(OVERPASS_URL, data={"data": query})
             resp.raise_for_status()
         data = resp.json()

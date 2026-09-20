@@ -9,6 +9,9 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from pydantic import BaseModel
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Settings(BaseModel):
@@ -44,9 +47,9 @@ class Settings(BaseModel):
     # --- Explanation / LLM ---
     # Set GEMINI_API_KEY to a free key from https://aistudio.google.com/apikey
     # Falls back to a deterministic template automatically if unset.
-    anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")  # legacy — ignored when GEMINI_API_KEY is set
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     explanation_model: str = os.getenv("EXPLANATION_MODEL", "gemini-2.0-flash")
+
 
     # --- Risk thresholds (spec §7.3 / §7.8) ---
     risk_status_high: float = 0.75
