@@ -64,7 +64,7 @@ The simulator starts automatically and emits one telemetry event every ~4s and o
 hazard update every ~20s (`SIMULATED`, clearly tagged `"source": "simulator"` on
 every event — see `data/schemas/event_schema.json`).
 
-## 3. Live datasets — what's actually called, and what happens when it's unreachable
+## 3. Live datasets - what's actually called, and what happens when it's unreachable
 
 SkyGuard-X calls three **real, free, public, no-API-key** data sources on startup
 (and on demand via `POST /api/v1/data-sources/refresh`). Each one has an
