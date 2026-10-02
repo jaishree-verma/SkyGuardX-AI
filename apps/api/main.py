@@ -39,6 +39,7 @@ from services.space_risk.simulator import SpaceSimulator, demo_controller
 from services.space_risk.anomaly import evaluate_model
 from services.space_risk.tle_data import load_sample_tle, load_active_tle
 from services.space_risk import live_asteroids_feed
+from services.space_risk import live_public_satellites
 from services.earth_risk import hazard as earth_hazard
 from services.earth_risk import live_hazard_feed
 from services.earth_risk import live_eonet_feed
@@ -536,6 +537,16 @@ async def ingest_event(req: IngestEventRequest):
 
 
 # --- Layer 1: Satellite Tracking & Telemetry Endpoints ---
+@app.get("/api/satellites/live")
+@app.get("/api/v1/satellites/live")
+async def get_live_public_satellites_endpoint():
+    """
+    Real-time public satellite telemetry for ISS, Sentinel-2A, Landsat 9, Terra, and Hubble.
+    Propagated dynamically from active CelesTrak TLEs using Skyfield/SGP4.
+    """
+    return await live_public_satellites.get_live_public_satellites()
+
+
 @app.get("/api/v1/satellites")
 async def get_satellites():
     return tracker.list_satellites()

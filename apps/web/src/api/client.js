@@ -25,6 +25,7 @@ export const api = {
   risks: () => request("/api/v1/risks"),
   alerts: () => request("/api/v1/alerts"),
   modelEvaluation: () => request("/api/v1/model-evaluation"),
+  liveSatellites: () => request("/api/satellites/live"),
   startDemo: () => request("/api/v1/demo/start", { method: "POST" }),
   resetDemo: () => request("/api/v1/demo/reset", { method: "POST" }),
 };

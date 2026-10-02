@@ -1,20 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import * as THREE from "three";
 
 export default function SpaceRocketHero3D({
   onCheckSatellite,
   onExploreHowItWorks,
   onQuickQuery,
+  onSearchSatellite,
   satCount = 6,
   debrisCount = 3,
   connected = true,
   lastEventTime,
   alertsCount = 0,
+  publicSatellites = [],
+  satellites = {},
 }) {
   const mountRef = useRef(null);
+  const searchContainerRef = useRef(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [searchVal, setSearchVal] = useState("");
   const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+
 
   // Three.js 3D Starfield & Orbit Rings Canvas
   useEffect(() => {
@@ -56,22 +63,22 @@ export default function SpaceRocketHero3D({
       starPositions[i * 3 + 1] = y;
       starPositions[i * 3 + 2] = z;
 
-      // Color variation: white, cyan/blue, warm yellow/gold
+      // Color variation: Cyber Gold, Crimson Red, Crisp White
       const rVal = Math.random();
-      if (rVal > 0.85) {
-        // Soft Yellow/Gold accent
+      if (rVal > 0.75) {
+        // Vibrant Gold / Solar Yellow accent
         starColors[i * 3] = 0.98;
         starColors[i * 3 + 1] = 0.82;
         starColors[i * 3 + 2] = 0.35;
       } else if (rVal > 0.45) {
-        // Tech Blue accent
-        starColors[i * 3] = 0.4;
-        starColors[i * 3 + 1] = 0.7;
-        starColors[i * 3 + 2] = 1.0;
+        // Aerospace Crimson / Hazard Red accent
+        starColors[i * 3] = 0.96;
+        starColors[i * 3 + 1] = 0.24;
+        starColors[i * 3 + 2] = 0.30;
       } else {
-        // Soft white star
-        starColors[i * 3] = 0.88;
-        starColors[i * 3 + 1] = 0.92;
+        // Starlight crisp white
+        starColors[i * 3] = 0.95;
+        starColors[i * 3 + 1] = 0.95;
         starColors[i * 3 + 2] = 0.98;
       }
     }
@@ -80,18 +87,18 @@ export default function SpaceRocketHero3D({
     starGeometry.setAttribute("color", new THREE.BufferAttribute(starColors, 3));
 
     const starMaterial = new THREE.PointsMaterial({
-      size: 0.85,
+      size: 0.9,
       vertexColors: true,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.85,
       blending: THREE.AdditiveBlending,
     });
 
     const starField = new THREE.Points(starGeometry, starMaterial);
     scene.add(starField);
 
-    // 2. 3D Orbit Trajectory Rings
-    const createOrbitRing = (radiusX, radiusY, tiltX, tiltY, colorHex, opacity = 0.4) => {
+    // 2. 3D Orbit Trajectory Rings (Gold & Crimson Palette)
+    const createOrbitRing = (radiusX, radiusY, tiltX, tiltY, colorHex, opacity = 0.45) => {
       const curve = new THREE.EllipseCurve(0, 0, radiusX, radiusY, 0, 2 * Math.PI, false, 0);
       const points = curve.getPoints(120);
       const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -107,9 +114,9 @@ export default function SpaceRocketHero3D({
       return ring;
     };
 
-    const ring1 = createOrbitRing(65, 45, Math.PI / 3, Math.PI / 6, 0x3b82f6, 0.45);
-    const ring2 = createOrbitRing(80, 52, Math.PI / 2.6, -Math.PI / 7, 0xf5c84c, 0.35);
-    const ring3 = createOrbitRing(50, 36, Math.PI / 3.4, Math.PI / 4, 0x60a5fa, 0.3);
+    const ring1 = createOrbitRing(65, 45, Math.PI / 3, Math.PI / 6, 0xf5c84c, 0.55); // Solar Gold
+    const ring2 = createOrbitRing(80, 52, Math.PI / 2.6, -Math.PI / 7, 0xe63946, 0.5); // Hazard Crimson
+    const ring3 = createOrbitRing(50, 36, Math.PI / 3.4, Math.PI / 4, 0xffb703, 0.4); // Warm Amber
     scene.add(ring1);
     scene.add(ring2);
     scene.add(ring3);
@@ -118,31 +125,31 @@ export default function SpaceRocketHero3D({
     const earthGroup = new THREE.Group();
     earthGroup.position.set(42, -26, -18);
 
-    // Earth deep body
+    // Earth deep body (Obsidian Black)
     const earthGeo = new THREE.SphereGeometry(22, 36, 36);
     const earthMat = new THREE.MeshBasicMaterial({
-      color: 0x081326,
+      color: 0x05080f,
     });
     const earthMesh = new THREE.Mesh(earthGeo, earthMat);
     earthGroup.add(earthMesh);
 
-    // Earth wireframe longitude/latitude telemetry grid
+    // Earth wireframe longitude/latitude telemetry grid (Cyber Gold)
     const gridGeo = new THREE.SphereGeometry(22.25, 26, 18);
     const gridMat = new THREE.MeshBasicMaterial({
-      color: 0x2563eb,
+      color: 0xf5c84c,
       wireframe: true,
       transparent: true,
-      opacity: 0.42,
+      opacity: 0.45,
     });
     const gridMesh = new THREE.Mesh(gridGeo, gridMat);
     earthGroup.add(gridMesh);
 
-    // Earth atmospheric glowing rim
+    // Earth atmospheric glowing rim (Solar Gold Halo)
     const glowGeo = new THREE.SphereGeometry(24.8, 32, 32);
     const glowMat = new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
+      color: 0xffb703,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.22,
       blending: THREE.AdditiveBlending,
       side: THREE.BackSide,
     });
@@ -305,15 +312,114 @@ export default function SpaceRocketHero3D({
     };
   }, []);
 
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setIsFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const allAvailableSatellites = useMemo(() => {
+    const list = [];
+    // 1. Real-time public satellites
+    if (publicSatellites && publicSatellites.length > 0) {
+      publicSatellites.forEach((pub) => {
+        list.push({
+          id: pub.satellite_id,
+          norad: pub.norad_id,
+          name: pub.name,
+          category: pub.category?.replace(/_/g, " ") || "Earth Observation",
+          altitude: pub.altitude_km,
+          velocity: pub.velocity_kms,
+          badge: "LIVE CELESTRAK",
+          badgeColor: "var(--teal)",
+          color: pub.color || "#38bdf8",
+          icon: pub.norad_id === 25544 ? "🛸" : "🛰️",
+        });
+      });
+    } else {
+      [
+        { id: "ISS", norad: 25544, name: "ISS", category: "Space Station", badge: "LIVE CELESTRAK", color: "#38bdf8", icon: "🛸" },
+        { id: "Sentinel-2A", norad: 40697, name: "Sentinel-2A", category: "Earth Observation", badge: "LIVE CELESTRAK", color: "#34d399", icon: "🛰️" },
+        { id: "Landsat 9", norad: 49260, name: "Landsat 9", category: "Multispectral EOS", badge: "LIVE CELESTRAK", color: "#fbbf24", icon: "🛰️" },
+        { id: "Terra", norad: 25994, name: "Terra", category: "EOS Flagship", badge: "LIVE CELESTRAK", color: "#f87171", icon: "🛰️" },
+        { id: "Hubble", norad: 20580, name: "Hubble", category: "Space Observatory", badge: "LIVE CELESTRAK", color: "#c084fc", icon: "🔭" },
+      ].forEach((s) => list.push({ ...s, badgeColor: "var(--teal)" }));
+    }
+
+    // 2. Constellation fleet
+    const constellationItems = [
+      { id: "SAT-1042", name: "SAT-1042", sub: "Sentinel-LEO", category: "Optical Recon", badge: "CONJUNCTION RISK", badgeColor: "var(--red)", color: "var(--red)", icon: "🚨" },
+      { id: "SAT-1001", name: "SAT-1001", sub: "Helios-Alpha", category: "Solar Sensor", badge: "NOMINAL", badgeColor: "var(--blue-light)", color: "var(--blue-light)", icon: "🛰️" },
+      { id: "SAT-1002", name: "SAT-1002", sub: "Nova-3", category: "Telemetry Relay", badge: "NOMINAL", badgeColor: "var(--blue-light)", color: "var(--blue-light)", icon: "🛰️" },
+      { id: "SAT-1003", name: "SAT-1003", sub: "Terra-Sense", category: "Atmosphere Monitor", badge: "WARNING", badgeColor: "var(--yellow)", color: "var(--yellow)", icon: "⚠️" },
+      { id: "SAT-2089", name: "SAT-2089", sub: "Orbital-Relay", category: "Communications", badge: "NOMINAL", badgeColor: "var(--blue-light)", color: "var(--blue-light)", icon: "🛰️" },
+      { id: "SAT-3011", name: "SAT-3011", sub: "Geo-Scout", category: "Geostationary", badge: "NOMINAL", badgeColor: "var(--blue-light)", color: "var(--blue-light)", icon: "🛰️" },
+    ];
+    constellationItems.forEach((c) => list.push(c));
+
+    return list;
+  }, [publicSatellites]);
+
+  const filteredSuggestions = useMemo(() => {
+    const q = searchVal.trim().toLowerCase();
+    if (!q) {
+      return allAvailableSatellites.slice(0, 6);
+    }
+    return allAvailableSatellites.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.id.toLowerCase().includes(q) ||
+        (s.norad && String(s.norad).includes(q)) ||
+        (s.sub && s.sub.toLowerCase().includes(q)) ||
+        (s.category && s.category.toLowerCase().includes(q))
+    ).slice(0, 8);
+  }, [searchVal, allAvailableSatellites]);
+
+  const handleSelectSatellite = (satId) => {
+    setSearchVal(satId);
+    setIsFocused(false);
+    if (onSearchSatellite) {
+      onSearchSatellite(satId);
+    } else if (onCheckSatellite) {
+      onCheckSatellite(satId);
+    }
+  };
+
   const handleSearchSubmit = (e) => {
     e?.preventDefault();
+    if (selectedIndex >= 0 && filteredSuggestions[selectedIndex]) {
+      handleSelectSatellite(filteredSuggestions[selectedIndex].id);
+      return;
+    }
     const q = searchVal.trim().toUpperCase() || "SAT-1042";
-    onCheckSatellite(q);
+    handleSelectSatellite(q);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!isFocused && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+      setIsFocused(true);
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev < filteredSuggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : filteredSuggestions.length - 1));
+    } else if (e.key === "Escape") {
+      setIsFocused(false);
+    }
   };
 
   // 3D Parallax offset for DOM elements
   const parallaxX = mousePos.x * 16;
   const parallaxY = mousePos.y * 12;
+
 
   return (
     <div
@@ -392,13 +498,13 @@ export default function SpaceRocketHero3D({
           left: "4%",
           top: "22%",
           zIndex: 6,
-          background: "rgba(10, 14, 22, 0.82)",
-          border: "1px solid rgba(59, 130, 246, 0.35)",
+          background: "rgba(6, 9, 14, 0.92)",
+          border: "1px solid rgba(245, 200, 76, 0.45)",
           borderRadius: 8,
           padding: "16px 18px",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-          boxShadow: "0 12px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(59, 130, 246, 0.2)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          boxShadow: "0 12px 32px rgba(0, 0, 0, 0.75), 0 0 18px rgba(245, 200, 76, 0.22)",
           transform: `translate3d(${parallaxX * 0.8}px, ${parallaxY * 0.8}px, 40px) rotateY(${mousePos.x * 8}deg) rotateX(${-mousePos.y * 6}deg)`,
           transition: "transform 0.15s ease-out",
           width: 220,
@@ -407,10 +513,10 @@ export default function SpaceRocketHero3D({
         className="desktop-nav"
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--blue-light)", fontWeight: 700 }}>
+          <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--yellow)", fontWeight: 700 }}>
             ● TELEMETRY HUD
           </div>
-          <span style={{ fontSize: 9, background: "rgba(59, 130, 246, 0.15)", color: "var(--blue-light)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>
+          <span style={{ fontSize: 9, background: "rgba(245, 200, 76, 0.18)", color: "var(--yellow)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)", fontWeight: 700 }}>
             Z-STREAM
           </span>
         </div>
@@ -434,7 +540,7 @@ export default function SpaceRocketHero3D({
             <div style={{ fontSize: 9.5, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>AI THREAT LEVEL</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
               <span className="status-dot status-NORMAL" />
-              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--blue-light)", fontFamily: "var(--font-mono)" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--yellow)", fontFamily: "var(--font-mono)" }}>
                 NOMINAL · 0.04
               </span>
             </div>
@@ -449,13 +555,13 @@ export default function SpaceRocketHero3D({
           right: "4%",
           top: "28%",
           zIndex: 6,
-          background: "rgba(10, 14, 22, 0.82)",
-          border: "1px solid rgba(245, 200, 76, 0.35)",
+          background: "rgba(6, 9, 14, 0.92)",
+          border: "1px solid rgba(230, 57, 70, 0.55)",
           borderRadius: 8,
           padding: "16px 18px",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-          boxShadow: "0 12px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(245, 200, 76, 0.15)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          boxShadow: "0 12px 32px rgba(0, 0, 0, 0.8), 0 0 20px rgba(230, 57, 70, 0.3)",
           transform: `translate3d(${-parallaxX * 0.8}px, ${parallaxY * 0.8}px, 40px) rotateY(${mousePos.x * -8}deg) rotateX(${-mousePos.y * 6}deg)`,
           transition: "transform 0.15s ease-out",
           width: 230,
@@ -604,82 +710,253 @@ export default function SpaceRocketHero3D({
           cascading orbital disasters in under 50 milliseconds.
         </p>
 
-        {/* Interactive Search & Live Check Box */}
-        <form
-          onSubmit={handleSearchSubmit}
+        {/* Prominent Central Search Bar with Live Autocomplete */}
+        <div
+          ref={searchContainerRef}
           style={{
-            display: "flex",
-            alignItems: "center",
+            position: "relative",
             width: "100%",
-            maxWidth: 580,
-            background: "rgba(13, 18, 28, 0.9)",
-            border: isHovered ? "1px solid var(--yellow)" : "1px solid rgba(59, 130, 246, 0.5)",
-            borderRadius: 8,
-            padding: "6px 8px",
-            boxShadow: isHovered
-              ? "0 8px 30px rgba(0,0,0,0.7), 0 0 20px rgba(245, 200, 76, 0.3)"
-              : "0 8px 30px rgba(0,0,0,0.7), 0 0 16px rgba(59, 130, 246, 0.25)",
-            backdropFilter: "blur(16px)",
-            transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-            marginBottom: 22,
+            maxWidth: 620,
+            marginBottom: 24,
+            zIndex: 40,
           }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
-          <span style={{ fontSize: 18, padding: "0 10px", opacity: 0.8 }}>🔍</span>
-          <input
-            type="text"
-            placeholder="Enter satellite ID or name (e.g. SAT-1042, STARLINK, NOAA-20)..."
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
+          <form
+            onSubmit={handleSearchSubmit}
             style={{
-              flex: 1,
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              color: "#ffffff",
-              fontSize: 14,
-              fontFamily: "var(--font-mono)",
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              background: "rgba(15, 23, 42, 0.88)",
+              border: isFocused || isHovered ? "1px solid var(--yellow)" : "1px solid rgba(59, 130, 246, 0.45)",
+              borderRadius: 10,
+              padding: "6px 8px",
+              boxShadow: isFocused
+                ? "0 0 24px var(--yellow-glow), 0 12px 36px rgba(0, 0, 0, 0.85)"
+                : isHovered
+                ? "0 0 20px rgba(245, 200, 76, 0.3), 0 8px 30px rgba(0, 0, 0, 0.7)"
+                : "0 0 16px rgba(59, 130, 246, 0.22), 0 8px 24px rgba(0, 0, 0, 0.6)",
+              backdropFilter: "blur(18px)",
+              WebkitBackdropFilter: "blur(18px)",
+              transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-          />
-          <button
-            type="submit"
-            className="cta-button"
-            style={{
-              padding: "10px 22px",
-              fontSize: 13,
-              borderRadius: 6,
-              fontWeight: 800,
-            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
-            <span>ANALYZE</span>
-            <span>➔</span>
-          </button>
-        </form>
+            <span style={{ fontSize: 18, padding: "0 10px", color: isFocused ? "var(--yellow)" : "var(--blue-light)" }}>
+              🔍
+            </span>
+            <input
+              type="text"
+              placeholder="Search satellite name or NORAD ID (e.g. ISS, Sentinel-2A, Landsat 9, 25544, SAT-1042)..."
+              value={searchVal}
+              onChange={(e) => {
+                setSearchVal(e.target.value);
+                setIsFocused(true);
+                setSelectedIndex(-1);
+              }}
+              onFocus={() => setIsFocused(true)}
+              onKeyDown={handleKeyDown}
+              style={{
+                flex: 1,
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: "#ffffff",
+                fontSize: 14.5,
+                fontFamily: "var(--font-mono)",
+                letterSpacing: "0.02em",
+              }}
+            />
+            <button
+              type="submit"
+              className="cta-button btn-interactive"
+              style={{
+                padding: "10px 20px",
+                fontSize: 13,
+                borderRadius: 7,
+                fontWeight: 800,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                flexShrink: 0,
+              }}
+            >
+              <span>TRACK LIVE</span>
+              <span>➔</span>
+            </button>
+          </form>
+
+          {/* Autocomplete Dropdown List */}
+          {isFocused && filteredSuggestions.length > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                left: 0,
+                right: 0,
+                background: "rgba(10, 15, 28, 0.98)",
+                border: "1px solid rgba(59, 130, 246, 0.4)",
+                borderRadius: 10,
+                padding: "8px",
+                boxShadow: "0 20px 48px rgba(0, 0, 0, 0.9), 0 0 20px rgba(59, 130, 246, 0.2)",
+                zIndex: 100,
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                textAlign: "left",
+                maxHeight: 330,
+                overflowY: "auto",
+              }}
+              className="scrollbar-thin nav-fade-in"
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--blue-light)",
+                  fontWeight: 800,
+                  padding: "4px 8px 6px",
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+                  marginBottom: 6,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                <span>MATCHING SATELLITES & LIVE TARGETS</span>
+                <span>PRESS ENTER TO SELECT</span>
+              </div>
+
+              {filteredSuggestions.map((item, idx) => {
+                const isSelected = selectedIndex === idx;
+                return (
+                  <div
+                    key={`${item.id}-${idx}`}
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // prevent input blur before click
+                      handleSelectSatellite(item.id);
+                    }}
+                    onMouseEnter={() => setSelectedIndex(idx)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      background: isSelected ? "rgba(245, 200, 76, 0.16)" : "transparent",
+                      border: isSelected ? "1px solid rgba(245, 200, 76, 0.4)" : "1px solid transparent",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      marginBottom: 2,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 17 }}>{item.icon || "🛰️"}</span>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              color: isSelected ? "var(--yellow)" : "#ffffff",
+                              fontFamily: "var(--font-mono)",
+                            }}
+                          >
+                            {item.name}
+                          </span>
+                          {item.norad && (
+                            <span
+                              style={{
+                                fontSize: 10,
+                                color: "var(--text-muted)",
+                                fontFamily: "var(--font-mono)",
+                              }}
+                            >
+                              (NORAD {item.norad})
+                            </span>
+                          )}
+                          {item.sub && (
+                            <span
+                              style={{
+                                fontSize: 10,
+                                color: "var(--text-muted)",
+                                fontFamily: "var(--font-mono)",
+                              }}
+                            >
+                              ({item.sub})
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 10.5, color: "var(--text-muted)", marginTop: 2 }}>
+                          {item.category}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                      {item.altitude && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontFamily: "var(--font-mono)",
+                            color: "var(--teal)",
+                            background: "rgba(46, 196, 182, 0.12)",
+                            padding: "2px 6px",
+                            borderRadius: 4,
+                          }}
+                        >
+                          {item.altitude?.toFixed(0)} km
+                        </span>
+                      )}
+                      <span
+                        style={{
+                          fontSize: 9.5,
+                          fontWeight: 800,
+                          padding: "2px 7px",
+                          borderRadius: 4,
+                          background: item.badgeColor ? `${item.badgeColor}22` : "rgba(59, 130, 246, 0.15)",
+                          color: item.badgeColor || "var(--blue-light)",
+                          border: `1px solid ${item.badgeColor || "var(--blue-light)"}44`,
+                          fontFamily: "var(--font-mono)",
+                          letterSpacing: "0.04em",
+                        }}
+                      >
+                        {item.badge}
+                      </span>
+                      <span style={{ fontSize: 12, color: isSelected ? "var(--yellow)" : "var(--text-muted)" }}>
+                        ➔
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Action Buttons: Check Satellite & Explore How It Works */}
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginBottom: 26 }}>
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginBottom: 24, zIndex: 10 }}>
           <button
-            onClick={() => onCheckSatellite("SAT-1042")}
-            className="cta-button"
+            onClick={() => handleSelectSatellite("SAT-1042")}
+            className="cta-button btn-interactive"
             style={{
               padding: "12px 26px",
               fontSize: 14,
-              borderRadius: 6,
+              borderRadius: 8,
               fontWeight: 800,
             }}
           >
             <span>⚡</span>
-            <span>CHECK LIVE SATELLITE</span>
+            <span>ENTER COMMAND CENTER</span>
           </button>
 
           <button
             onClick={onExploreHowItWorks}
-            className="cta-button-outline"
+            className="cta-button-outline btn-interactive"
             style={{
               padding: "11px 22px",
               fontSize: 14,
-              borderRadius: 6,
+              borderRadius: 8,
               background: "rgba(10, 14, 22, 0.8)",
               backdropFilter: "blur(8px)",
               borderColor: "rgba(59, 130, 246, 0.4)",
@@ -689,8 +966,8 @@ export default function SpaceRocketHero3D({
           </button>
         </div>
 
-        {/* Quick Query Direct Chips */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+        {/* Direct Query Interactive Chips with live CelesTrak satellites */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "center", zIndex: 10 }}>
           <span
             style={{
               fontSize: 11,
@@ -699,52 +976,91 @@ export default function SpaceRocketHero3D({
               letterSpacing: "0.04em",
             }}
           >
-            DIRECT QUERY:
+            DIRECT LAUNCH:
           </span>
 
+          {/* ISS */}
           <button
-            onClick={() => onQuickQuery("SAT-1042")}
-            className="chip-btn"
+            onClick={() => handleSelectSatellite("ISS")}
+            className="chip-btn btn-interactive"
+            style={{
+              borderColor: "rgba(56, 189, 248, 0.4)",
+              background: "rgba(56, 189, 248, 0.12)",
+              color: "#ffffff",
+            }}
+            title="Focus map on International Space Station (NORAD 25544)"
+          >
+            <span style={{ color: "#38bdf8" }}>🛸</span>
+            <span style={{ fontWeight: 700 }}>ISS</span>
+            <span style={{ color: "#38bdf8", fontSize: 9.5 }}>(NORAD 25544)</span>
+          </button>
+
+          {/* Sentinel-2A */}
+          <button
+            onClick={() => handleSelectSatellite("Sentinel-2A")}
+            className="chip-btn btn-interactive"
+            style={{
+              borderColor: "rgba(52, 211, 153, 0.4)",
+              background: "rgba(52, 211, 153, 0.12)",
+              color: "#ffffff",
+            }}
+            title="Focus map on Sentinel-2A Earth Observation (NORAD 40697)"
+          >
+            <span style={{ color: "#34d399" }}>🛰️</span>
+            <span style={{ fontWeight: 700 }}>Sentinel-2A</span>
+            <span style={{ color: "#34d399", fontSize: 9.5 }}>(NORAD 40697)</span>
+          </button>
+
+          {/* SAT-1042 Conjunction */}
+          <button
+            onClick={() => handleSelectSatellite("SAT-1042")}
+            className="chip-btn btn-interactive"
             style={{
               borderColor: "rgba(230, 57, 70, 0.4)",
               background: "rgba(230, 57, 70, 0.12)",
               color: "#ffffff",
             }}
+            title="Focus map on SAT-1042 High Risk Conjunction"
           >
             <span style={{ color: "var(--red)" }}>🚨</span>
             <span style={{ fontWeight: 700 }}>SAT-1042</span>
-            <span style={{ color: "var(--red)", fontSize: 10 }}>(HIGH RISK · CONJUNCTION)</span>
+            <span style={{ color: "var(--red)", fontSize: 9.5 }}>(CONJUNCTION)</span>
           </button>
 
+          {/* Landsat 9 */}
           <button
-            onClick={() => onQuickQuery("SAT-1001")}
-            className="chip-btn"
+            onClick={() => handleSelectSatellite("Landsat 9")}
+            className="chip-btn btn-interactive"
             style={{
-              borderColor: "rgba(59, 130, 246, 0.4)",
-              background: "rgba(59, 130, 246, 0.12)",
+              borderColor: "rgba(251, 191, 36, 0.4)",
+              background: "rgba(251, 191, 36, 0.12)",
               color: "#ffffff",
             }}
+            title="Focus map on Landsat 9 Multispectral EOS (NORAD 49260)"
           >
-            <span style={{ color: "var(--blue-light)" }}>🟢</span>
-            <span style={{ fontWeight: 700 }}>SAT-1001</span>
-            <span style={{ color: "var(--blue-light)", fontSize: 10 }}>(NOMINAL)</span>
+            <span style={{ color: "#fbbf24" }}>🌍</span>
+            <span style={{ fontWeight: 700 }}>Landsat 9</span>
+            <span style={{ color: "#fbbf24", fontSize: 9.5 }}>(NORAD 49260)</span>
           </button>
 
+          {/* Hubble */}
           <button
-            onClick={() => onQuickQuery("SAT-1003")}
-            className="chip-btn"
+            onClick={() => handleSelectSatellite("Hubble")}
+            className="chip-btn btn-interactive"
             style={{
-              borderColor: "rgba(245, 200, 76, 0.4)",
-              background: "rgba(245, 200, 76, 0.12)",
+              borderColor: "rgba(192, 132, 252, 0.4)",
+              background: "rgba(192, 132, 252, 0.12)",
               color: "#ffffff",
             }}
+            title="Focus map on Hubble Space Telescope (NORAD 20580)"
           >
-            <span style={{ color: "var(--yellow)" }}>⚠️</span>
-            <span style={{ fontWeight: 700 }}>SAT-1003</span>
-            <span style={{ color: "var(--yellow)", fontSize: 10 }}>(WARNING)</span>
+            <span style={{ color: "#c084fc" }}>🔭</span>
+            <span style={{ fontWeight: 700 }}>Hubble</span>
+            <span style={{ color: "#c084fc", fontSize: 9.5 }}>(NORAD 20580)</span>
           </button>
         </div>
       </div>
+
 
       {/* Bottom Subtle Gradient Fade into next sections */}
       <div

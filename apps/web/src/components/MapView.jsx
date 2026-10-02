@@ -1,8 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, GeoJSON, CircleMarker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, CircleMarker, Popup, useMap } from "react-leaflet";
 import { api } from "../api/client.js";
+import WeatherLayer from "./WeatherLayer.jsx";
 
 const LA_CENTER = [34.055, -118.555];
+
+function MapResizeHandler() {
+  const map = useMap();
+  useEffect(() => {
+    map.invalidateSize();
+    const t = setTimeout(() => map.invalidateSize(), 150);
+    const onResize = () => map.invalidateSize();
+    window.addEventListener("resize", onResize);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [map]);
+  return null;
+}
 
 export default function MapView({ impact }) {
   const [hazard, setHazard] = useState(null);
@@ -28,17 +44,20 @@ export default function MapView({ impact }) {
   const exposedIds = new Set((impact?.affected_facilities || []).map((f) => f.asset_id));
 
   return (
-    <div style={{ height: "100%", position: "relative" }}>
+    <div style={{ height: "100%", width: "100%", minHeight: "80vh", position: "relative" }}>
       <MapContainer
         center={LA_CENTER}
         zoom={12}
         style={{ height: "100%", width: "100%", background: "#0a0e14" }}
         zoomControl={false}
       >
+        <MapResizeHandler />
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors, &copy; CARTO'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          maxZoom={16}
         />
+        <WeatherLayer defaultMode="radar" />
         {hazard?.geometry && (
           <GeoJSON
             data={hazard.geometry}

@@ -11,19 +11,47 @@ const STATUS_BADGE = {
   STALE: { bg: "rgba(102, 115, 140, 0.15)", color: "#66738c", border: "rgba(102, 115, 140, 0.3)" },
 };
 
-export default function SatelliteTable({ satellites, risks, selectedSatId, onSelectSatellite, onInspectSatellite }) {
+export default function SatelliteTable({
+  satellites = {},
+  publicSatellites = [],
+  risks = {},
+  selectedSatId,
+  onSelectSatellite,
+  onInspectSatellite,
+}) {
+  const [filter, setFilter] = React.useState("all"); // "all" | "constellation" | "public"
+
   const satList = Object.values(satellites).sort((a, b) => {
-    // Put highest risk on top
     const riskA = risks[a.satellite_id]?.risk_score || 0;
     const riskB = risks[b.satellite_id]?.risk_score || 0;
     return riskB - riskA;
   });
 
+  const formattedPublic = publicSatellites.map((s) => ({
+    satellite_id: s.satellite_id || `SAT-${s.norad_id}`,
+    satellite_name: s.name,
+    health_status: "NORMAL",
+    health_score: s.health_score || 99,
+    temperature_c: s.temperature_c || 22,
+    battery_level: s.battery_level || 95,
+    altitude_km: s.altitude_km,
+    velocity_kms: s.velocity_kms,
+    is_live_public: true,
+    norad_id: s.norad_id,
+  }));
+
+  const displayList =
+    filter === "constellation"
+      ? satList
+      : filter === "public"
+      ? formattedPublic
+      : [...satList, ...formattedPublic];
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "var(--panel)" }}>
       <div
         style={{
-          padding: "10px 14px",
+          padding: "8px 14px",
           fontSize: 11,
           fontWeight: 700,
           color: "var(--text-muted)",
@@ -34,8 +62,60 @@ export default function SatelliteTable({ satellites, risks, selectedSatId, onSel
           fontFamily: "var(--font-mono)",
         }}
       >
-        <span>ACTIVE SATELLITE FLEET ({satList.length})</span>
-        <span style={{ fontSize: 10, color: "var(--text-muted)" }}>SELECT ROW OR CLICK SCAN</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span>SATELLITE TRACKING ({displayList.length})</span>
+          <div style={{ display: "flex", gap: 3, background: "rgba(255,255,255,0.06)", borderRadius: 4, padding: 2 }}>
+            <button
+              type="button"
+              onClick={() => setFilter("all")}
+              style={{
+                background: filter === "all" ? "var(--teal)" : "transparent",
+                color: filter === "all" ? "#0a0e14" : "var(--text-muted)",
+                border: "none",
+                borderRadius: 3,
+                padding: "2px 7px",
+                fontSize: 9.5,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              All ({satList.length + formattedPublic.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter("constellation")}
+              style={{
+                background: filter === "constellation" ? "var(--teal)" : "transparent",
+                color: filter === "constellation" ? "#0a0e14" : "var(--text-muted)",
+                border: "none",
+                borderRadius: 3,
+                padding: "2px 7px",
+                fontSize: 9.5,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Constellation ({satList.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter("public")}
+              style={{
+                background: filter === "public" ? "var(--teal)" : "transparent",
+                color: filter === "public" ? "#0a0e14" : "var(--text-muted)",
+                border: "none",
+                borderRadius: 3,
+                padding: "2px 7px",
+                fontSize: 9.5,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Live Public ({formattedPublic.length})
+            </button>
+          </div>
+        </div>
+        <span style={{ fontSize: 10, color: "var(--text-muted)" }}>CLICK ROW TO TRACK</span>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto" }} className="scrollbar-thin">

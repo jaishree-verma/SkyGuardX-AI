@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNexusSocket } from "./hooks/useWebSocket.js";
+import { useLivePublicSatellites } from "./hooks/useLivePublicSatellites.js";
 import { api } from "./api/client.js";
 import { ToastProvider, useToast } from "./components/Toast.jsx";
 import AppNavbar from "./components/AppNavbar.jsx";
@@ -29,6 +30,7 @@ function AppContent() {
   } = useNexusSocket();
 
   const { showToast } = useToast();
+  const { publicSatellites } = useLivePublicSatellites(3500);
 
   // Route State: home | check | monitor | satellites | alerts | events | analytics | about
   const [currentView, setCurrentView] = useState("home");
@@ -190,6 +192,11 @@ function AppContent() {
     handleNavigate("check", satId || "SAT-1042");
   };
 
+  const handleSearchSatellite = useCallback((satId) => {
+    setSelectedSatId(satId);
+    handleNavigate("monitor", satId);
+  }, [handleNavigate]);
+
   return (
     <div
       style={{
@@ -215,6 +222,7 @@ function AppContent() {
         selectedSatId={selectedSatId}
         onSelectSatellite={setSelectedSatId}
         satellites={satellites}
+        publicSatellites={publicSatellites}
       />
 
       {/* 2. Main Product Flow Switcher */}
@@ -223,9 +231,11 @@ function AppContent() {
         {currentView === "home" && (
           <LandingPage
             onCheckSatellite={handleNavigateToCheck}
+            onSearchSatellite={handleSearchSatellite}
             onOpenMonitor={() => handleNavigate("monitor")}
             onNavigateView={handleNavigate}
             satellites={satellites}
+            publicSatellites={publicSatellites}
             spaceObjects={spaceObjects}
             events={events}
             risks={risks}

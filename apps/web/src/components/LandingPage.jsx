@@ -7,9 +7,11 @@ import Card3D from "./Card3D.jsx";
 
 export default function LandingPage({
   onCheckSatellite,
+  onSearchSatellite,
   onOpenMonitor,
   onNavigateView,
   satellites = {},
+  publicSatellites = [],
   spaceObjects = [],
   events = [],
   risks = {},
@@ -26,7 +28,8 @@ export default function LandingPage({
   const handleSearchSubmit = (e) => {
     e?.preventDefault();
     const q = searchQuery.trim().toUpperCase() || "SAT-1042";
-    onCheckSatellite(q);
+    if (onSearchSatellite) onSearchSatellite(q);
+    else onCheckSatellite(q);
   };
 
   const scrollToSection = (id) => {
@@ -53,14 +56,18 @@ export default function LandingPage({
       {/* ========================================================================= */}
       <SpaceRocketHero3D
         onCheckSatellite={onCheckSatellite}
+        onSearchSatellite={onSearchSatellite}
         onExploreHowItWorks={() => scrollToSection("how-it-works")}
-        onQuickQuery={(id) => onCheckSatellite(id)}
+        onQuickQuery={(id) => (onSearchSatellite ? onSearchSatellite(id) : onCheckSatellite(id))}
         satCount={satCount}
         debrisCount={debrisCount}
         connected={connected}
         lastEventTime={lastEventTime}
         alertsCount={alertsCount}
+        publicSatellites={publicSatellites}
+        satellites={satellites}
       />
+
 
       {/* ========================================================================= */}
       {/* SECTION 1.5: ABOUT SKYGUARDX AI & 5-LAYER ARCHITECTURE SCROBBLER */}

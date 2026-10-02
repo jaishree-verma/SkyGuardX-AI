@@ -10,38 +10,41 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
-  /* Black Foundation */
-  --bg: #06090e;
-  --panel: #0d121c;
-  --panel-raised: #141c2b;
-  --panel-glass: rgba(13, 18, 28, 0.82);
-  --border: #1b2538;
-  --border-highlight: #283750;
+  /* Deep Space Obsidian Black Foundation */
+  --bg: #05080c;
+  --bg-darker: #020408;
+  --panel: #0a0d14;
+  --panel-raised: #11151f;
+  --panel-glass: rgba(10, 13, 20, 0.88);
+  --border: #1a202c;
+  --border-highlight: rgba(245, 200, 76, 0.3);
+  --border-danger: rgba(230, 57, 70, 0.45);
 
   /* Typography */
-  --text: #f0f4f8;
-  --text-muted: #7888a2;
+  --text: #f3f5f8;
+  --text-muted: #8492a6;
 
-  /* Yellow: Highlights & Primary Actions */
+  /* Cyber Gold & Solar Yellow: Primary Actions, Telemetry & Active Highlights */
   --yellow: #f5c84c;
-  --yellow-hover: #e0b43b;
-  --yellow-glow: rgba(245, 200, 76, 0.28);
-
-  /* Red: Alerts, Danger, Critical States */
-  --red: #e63946;
-  --red-hover: #d12c39;
-  --red-glow: rgba(230, 57, 70, 0.35);
-
-  /* Blue: Information, Normal States, Technology */
-  --blue: #3b82f6;
-  --blue-hover: #2563eb;
-  --blue-glow: rgba(59, 130, 246, 0.3);
-  --blue-light: #60a5fa;
-
-  /* Legacy alias support */
+  --yellow-hover: #ffd166;
+  --yellow-glow: rgba(245, 200, 76, 0.38);
+  --yellow-bright: #ffd166;
   --gold: #f5c84c;
   --amber: #f5c84c;
-  --teal: #3b82f6;
+
+  /* Aerospace Crimson & Danger Red: Anomaly Alerts, Conjunctions & Hazards */
+  --red: #e63946;
+  --red-hover: #ff3849;
+  --red-glow: rgba(230, 57, 70, 0.45);
+  --red-bright: #ff3344;
+  --crimson: #e63946;
+
+  /* Information, Normal telemetry mapped to Gold/Yellow & Warm Amber */
+  --blue: #f5c84c;
+  --blue-hover: #ffd166;
+  --blue-glow: rgba(245, 200, 76, 0.35);
+  --blue-light: #ffd166;
+  --teal: #f5c84c;
 
   --font-ui: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
@@ -112,8 +115,8 @@ button {
 }
 .status-NORMAL,
 .status-LOW {
-  background: var(--blue);
-  box-shadow: 0 0 6px var(--blue-glow);
+  background: var(--yellow);
+  box-shadow: 0 0 8px var(--yellow-glow);
 }
 
 .pill {
@@ -231,8 +234,9 @@ button {
   transform: translateY(0);
 }
 
-.cta-button-blue {
-  background: var(--blue);
+.cta-button-blue,
+.cta-button-red {
+  background: var(--red);
   color: #ffffff;
   border: none;
   font-weight: 700;
@@ -245,12 +249,13 @@ button {
   gap: 8px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 10px var(--blue-glow);
+  box-shadow: 0 2px 10px var(--red-glow);
 }
-.cta-button-blue:hover {
-  background: var(--blue-hover);
+.cta-button-blue:hover,
+.cta-button-red:hover {
+  background: var(--red-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
+  box-shadow: 0 4px 16px rgba(230, 57, 70, 0.6);
 }
 
 .cta-button-outline {
@@ -268,8 +273,8 @@ button {
   transition: all 0.2s ease;
 }
 .cta-button-outline:hover {
-  border-color: var(--blue);
-  background: rgba(59, 130, 246, 0.08);
+  border-color: var(--yellow);
+  background: rgba(245, 200, 76, 0.12);
   color: #ffffff;
 }
 
@@ -349,23 +354,23 @@ button {
 }
 
 .nav-btn-primary {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(20, 28, 48, 0.8) 100%) !important;
-  color: var(--blue-light) !important;
-  border: 1px solid rgba(59, 130, 246, 0.45) !important;
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+  background: linear-gradient(135deg, rgba(245, 200, 76, 0.22) 0%, rgba(20, 20, 20, 0.95) 100%) !important;
+  color: var(--yellow) !important;
+  border: 1px solid rgba(245, 200, 76, 0.5) !important;
+  box-shadow: 0 0 14px rgba(245, 200, 76, 0.25);
 }
 
 .nav-btn-primary:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.35) 0%, rgba(245, 200, 76, 0.15) 100%) !important;
+  background: linear-gradient(135deg, rgba(245, 200, 76, 0.35) 0%, rgba(230, 57, 70, 0.18) 100%) !important;
   color: #ffffff !important;
   border-color: var(--yellow) !important;
   transform: translateY(-2px);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.45), 0 0 10px rgba(245, 200, 76, 0.3);
+  box-shadow: 0 0 20px rgba(245, 200, 76, 0.5), 0 0 12px rgba(230, 57, 70, 0.3);
 }
 
 .nav-btn-primary.active {
   border-color: var(--yellow) !important;
-  box-shadow: 0 0 24px rgba(245, 200, 76, 0.35), inset 0 0 12px rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 0 24px rgba(245, 200, 76, 0.45), inset 0 0 12px rgba(245, 200, 76, 0.25) !important;
   color: var(--yellow) !important;
 }
 
@@ -636,4 +641,170 @@ button {
 .animated-orbit-ring {
   animation: ring-pulse-spin 18s linear infinite;
 }
+
+/* ========================================================================= */
+/* NAVBAR & LANDING PAGE TRANSITION STYLES                                  */
+/* ========================================================================= */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes navFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-fade-in {
+  animation: navFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Button Interactive Scale & Brightness Hover Effects */
+.btn-interactive {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+}
+
+.btn-interactive:hover {
+  transform: scale(1.05) !important;
+  filter: brightness(1.12) !important;
+}
+
+.btn-interactive:active {
+  transform: scale(0.95) !important;
+}
+
+/* Nav Item with Animated Glowing Bottom Indicator Line */
+.nav-item-indicator {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.nav-item-indicator::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 12%;
+  width: 76%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--yellow) 50%, transparent 100%);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+  opacity: 0;
+  box-shadow: 0 0 8px var(--yellow-glow);
+}
+
+.nav-item-indicator:hover::after,
+.nav-item-indicator.active::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* 64px Glassmorphic Navigation Bar Container */
+.navbar-glass-container {
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  background: rgba(6, 9, 14, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(245, 200, 76, 0.18) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.85), 0 0 16px rgba(245, 200, 76, 0.08) !important;
+  box-sizing: border-box;
+}
+
+.navbar-transparent-landing {
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-sizing: border-box;
+}
+
+/* ========================================================================= */
+/* DYNAMIC BLACK - RED - YELLOW TACTICAL ANIMATIONS                         */
+/* ========================================================================= */
+
+@keyframes dynamic-hazard-border {
+  0%, 100% {
+    border-color: rgba(230, 57, 70, 0.7);
+    box-shadow: 0 0 16px rgba(230, 57, 70, 0.4), inset 0 0 8px rgba(230, 57, 70, 0.15);
+  }
+  50% {
+    border-color: rgba(245, 200, 76, 0.8);
+    box-shadow: 0 0 22px rgba(245, 200, 76, 0.5), inset 0 0 12px rgba(245, 200, 76, 0.2);
+  }
+}
+
+.dynamic-hazard-pulse {
+  animation: dynamic-hazard-border 3.2s ease-in-out infinite;
+}
+
+@keyframes dynamic-gold-glow {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(245, 200, 76, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(245, 200, 76, 0.65), 0 0 6px var(--yellow);
+  }
+}
+
+.dynamic-gold-glow {
+  animation: dynamic-gold-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes laser-flow-right {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.laser-flow-amber {
+  background: linear-gradient(90deg, transparent 0%, rgba(245, 200, 76, 0.85) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: laser-flow-right 2s linear infinite;
+}
+
+.laser-flow-red {
+  background: linear-gradient(90deg, transparent 0%, rgba(230, 57, 70, 0.9) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: laser-flow-right 1.8s linear infinite;
+}
+
+.gradient-text-fire {
+  background: linear-gradient(135deg, #ffffff 0%, #f5c84c 50%, #e63946 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tactical-black-panel {
+  background: rgba(8, 11, 18, 0.92) !important;
+  border: 1px solid rgba(245, 200, 76, 0.25) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+
 
