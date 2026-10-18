@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNexusSocket } from "./hooks/useWebSocket.js";
 import { useLivePublicSatellites } from "./hooks/useLivePublicSatellites.js";
 import { api } from "./api/client.js";
@@ -27,6 +27,7 @@ function AppContent() {
     conjunctions,
     alerts,
     convergenceAlerts,
+    recommendations,
   } = useNexusSocket();
 
   const { showToast } = useToast();
@@ -146,6 +147,21 @@ function AppContent() {
       );
     }
   }, [convergenceAlerts]);
+
+  // Notify operator on new AI recommendation pending human approval
+  const lastNotifiedRecId = useRef(null);
+  useEffect(() => {
+    if (recommendations && recommendations.length > 0) {
+      const topRec = recommendations[0];
+      if (topRec && topRec.approval_state === "PENDING" && lastNotifiedRecId.current !== topRec.recommendation_id) {
+        lastNotifiedRecId.current = topRec.recommendation_id;
+        showToast(
+          `🛡️ AI Recommendation: ${topRec.action_type || topRec.action} pending operator sign-off (IBM Z)`,
+          "warning"
+        );
+      }
+    }
+  }, [recommendations, showToast]);
 
   // Initial fetch of active alerts and objects
   useEffect(() => {

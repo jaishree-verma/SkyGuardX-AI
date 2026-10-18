@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AIThreatBriefing from "./AIThreatBriefing";
+import { api } from "../api/client.js";
 
 function CTIDial({ value }) {
   const pct = Math.min(1, Math.max(0, value));
@@ -102,11 +103,7 @@ export default function ConvergenceAlert({ alert, onDismiss }) {
   const handleDismiss = async () => {
     setDismissing(true);
     try {
-      await fetch(`/api/v1/convergence/alerts/${alert.convergence_id}/dismiss`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ approver: operator, decision: reason, notes: null }),
-      });
+      await api.dismissConvergenceAlert(alert.convergence_id, operator, reason);
     } catch (_) { /* non-blocking */ }
     setVisible(false);
     setTimeout(() => onDismiss?.(), 400);

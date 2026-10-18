@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { api } from "../api/client.js";
 
 function SeverityDot({ severity }) {
   const color = {
@@ -62,16 +63,15 @@ export default function ConvergenceMonitor({ onAlertSelect }) {
 
   const fetchData = async () => {
     try {
-      const [alertsRes, statusRes] = await Promise.all([
-        fetch("/api/v1/convergence/alerts?limit=10"),
-        fetch("/api/v1/convergence/status"),
+      const [alertsData, statusData] = await Promise.all([
+        api.convergenceAlerts(10).catch(() => null),
+        api.convergenceStatus().catch(() => null),
       ]);
-      if (alertsRes.ok) {
-        const data = await alertsRes.json();
-        setAlerts(data.alerts || []);
+      if (alertsData) {
+        setAlerts(alertsData.alerts || []);
       }
-      if (statusRes.ok) {
-        setStatus(await statusRes.json());
+      if (statusData) {
+        setStatus(statusData);
       }
       setLastFetch(new Date());
     } catch (_) {}

@@ -13,6 +13,9 @@ import AlertsView from "./AlertsView.jsx";
 import EventsView from "./EventsView.jsx";
 import AnalyticsView from "./AnalyticsView.jsx";
 import AlertBanner from "./AlertBanner.jsx";
+import DecisionPanel from "./DecisionPanel.jsx";
+import ImpactCascadePanel from "./ImpactCascadePanel.jsx";
+import ConvergenceMonitor from "./ConvergenceMonitor.jsx";
 import { useLivePublicSatellites } from "../hooks/useLivePublicSatellites.js";
 
 export default function CommandCenter({
@@ -22,7 +25,21 @@ export default function CommandCenter({
   onInspectSatellite,
   onNavigateTab,
 }) {
-  const { connected, lastEventTime, events, satellites, spaceObjects, risks, conjunction, alerts } = useNexusSocket();
+  const {
+    connected,
+    lastEventTime,
+    events,
+    satellites,
+    spaceObjects,
+    risks,
+    conjunction,
+    alerts,
+    impact,
+    cascade,
+    scenarioResults,
+    recommendations = [],
+    convergenceAlerts = [],
+  } = useNexusSocket();
   const { publicSatellites, isLive: isPublicLive } = useLivePublicSatellites(3500);
 
   const [activeTab, setActiveTab] = useState("overview");
@@ -36,9 +53,25 @@ export default function CommandCenter({
   const [showAIInsights, setShowAIInsights] = useState(false);
   const [showFleetTable, setShowFleetTable] = useState(false);
   const [showEventStream, setShowEventStream] = useState(false);
+  const [showDecisionPanel, setShowDecisionPanel] = useState(false);
+  const [showConvergenceMonitor, setShowConvergenceMonitor] = useState(false);
   const [showFullBanner, setShowFullBanner] = useState(true);
 
-  const layoutKey = `${showAIInsights}-${showFleetTable}-${showEventStream}-${showFullBanner}`;
+  const [localRecommendations, setLocalRecommendations] = useState([]);
+
+  useEffect(() => {
+    if (recommendations && recommendations.length > 0) {
+      setLocalRecommendations(recommendations);
+    }
+  }, [recommendations]);
+
+  const handleRecommendationApproved = (updated) => {
+    setLocalRecommendations((prev) =>
+      prev.map((r) => (r.recommendation_id === updated.recommendation_id ? updated : r))
+    );
+  };
+
+  const layoutKey = `${showAIInsights}-${showFleetTable}-${showEventStream}-${showDecisionPanel}-${showConvergenceMonitor}-${showFullBanner}`;
 
   // Merge incoming websocket alerts into active alert history
   useEffect(() => {
@@ -428,6 +461,137 @@ export default function CommandCenter({
                 </div>
               )}
 
+              {/* FLOATING OVERLAY 4: AI DECISION LOOP & IBM Z APPROVAL PANEL */}
+              {showDecisionPanel && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    left: showAIInsights ? 404 : 14,
+                    bottom: 60,
+                    width: 440,
+                    maxWidth: "calc(100vw - 28px)",
+                    zIndex: 660,
+                    background: "rgba(10, 14, 22, 0.96)",
+                    backdropFilter: "blur(14px)",
+                    border: "1px solid rgba(59, 130, 246, 0.4)",
+                    borderRadius: 8,
+                    boxShadow: "0 12px 40px rgba(0, 0, 0, 0.8)",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "10px 14px",
+                      borderBottom: "1px solid var(--border)",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      fontFamily: "var(--font-mono)",
+                      background: "rgba(59, 130, 246, 0.08)",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                      <span style={{ fontSize: 14 }}>🛡️</span>
+                      <span style={{ fontWeight: 800, fontSize: 11, color: "var(--blue-light)" }}>
+                        DECISION LOOP & IBM Z BOUNDARY
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowDecisionPanel(false)}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: "var(--text-muted)",
+                        fontSize: 16,
+                        cursor: "pointer",
+                        lineHeight: 1,
+                      }}
+                      title="Close panel"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }} className="scrollbar-thin">
+                    <DecisionPanel
+                      recommendations={localRecommendations}
+                      scenarioResults={scenarioResults}
+                      onApproved={handleRecommendationApproved}
+                    />
+                    <ImpactCascadePanel impact={impact} cascade={cascade} />
+                  </div>
+                </div>
+              )}
+
+              {/* FLOATING OVERLAY 5: MULTI-HAZARD CONVERGENCE MONITOR */}
+              {showConvergenceMonitor && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    right: showEventStream ? 374 : 14,
+                    bottom: 60,
+                    width: 400,
+                    maxWidth: "calc(100vw - 28px)",
+                    zIndex: 660,
+                    background: "rgba(10, 14, 22, 0.96)",
+                    backdropFilter: "blur(14px)",
+                    border: "1px solid rgba(245, 158, 11, 0.4)",
+                    borderRadius: 8,
+                    boxShadow: "0 12px 40px rgba(0, 0, 0, 0.8)",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "10px 14px",
+                      borderBottom: "1px solid var(--border)",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      fontFamily: "var(--font-mono)",
+                      background: "rgba(245, 158, 11, 0.08)",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                      <span style={{ fontSize: 14 }}>⚡</span>
+                      <span style={{ fontWeight: 800, fontSize: 11, color: "var(--amber)" }}>
+                        MULTI-HAZARD CONVERGENCE MONITOR
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowConvergenceMonitor(false)}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: "var(--text-muted)",
+                        fontSize: 16,
+                        cursor: "pointer",
+                        lineHeight: 1,
+                      }}
+                      title="Close monitor"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div style={{ flex: 1, overflowY: "auto", padding: 12 }} className="scrollbar-thin">
+                    <ConvergenceMonitor
+                      onAlertSelect={(alert) => {
+                        console.log("Selected convergence alert:", alert);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* FLOATING MISSION CONTROL DOCK: BOTTOM-CENTER OVERLAY */}
               <div
                 style={{
@@ -471,6 +635,68 @@ export default function CommandCenter({
                   <span>🧠</span>
                   <span>AI Insights</span>
                   <span style={{ fontSize: 9, opacity: 0.8 }}>{showAIInsights ? "▲" : "▼"}</span>
+                </button>
+
+                <div style={{ width: 1, height: 16, background: "rgba(59, 130, 246, 0.3)" }} />
+
+                <button
+                  type="button"
+                  onClick={() => setShowDecisionPanel(!showDecisionPanel)}
+                  style={{
+                    background: showDecisionPanel ? "rgba(59, 130, 246, 0.25)" : "transparent",
+                    color: showDecisionPanel ? "var(--blue-light)" : "var(--text)",
+                    border: `1px solid ${showDecisionPanel ? "var(--blue-light)" : "transparent"}`,
+                    borderRadius: 16,
+                    padding: "4px 10px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontWeight: 700,
+                    fontSize: 11,
+                    transition: "all 0.15s ease",
+                  }}
+                  title="Toggle AI Decision Loop & IBM Z Boundary Sign-Off Panel"
+                >
+                  <span>🛡️</span>
+                  <span>Decisions & IBM Z</span>
+                  {localRecommendations.some((r) => r.approval_state === "PENDING") && (
+                    <span style={{ fontSize: 8.5, background: "var(--blue)", color: "#000", padding: "1px 5px", borderRadius: 8, fontWeight: 900 }}>
+                      PENDING
+                    </span>
+                  )}
+                  <span style={{ fontSize: 9, opacity: 0.8 }}>{showDecisionPanel ? "▲" : "▼"}</span>
+                </button>
+
+                <div style={{ width: 1, height: 16, background: "rgba(245, 158, 11, 0.3)" }} />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConvergenceMonitor(!showConvergenceMonitor)}
+                  style={{
+                    background: showConvergenceMonitor ? "rgba(245, 158, 11, 0.25)" : "transparent",
+                    color: showConvergenceMonitor ? "var(--amber)" : "var(--text)",
+                    border: `1px solid ${showConvergenceMonitor ? "var(--amber)" : "transparent"}`,
+                    borderRadius: 16,
+                    padding: "4px 10px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontWeight: 700,
+                    fontSize: 11,
+                    transition: "all 0.15s ease",
+                  }}
+                  title="Toggle Multi-Hazard Compound Threat Convergence Monitor"
+                >
+                  <span>⚡</span>
+                  <span>Convergence</span>
+                  {convergenceAlerts.length > 0 && (
+                    <span style={{ fontSize: 8.5, background: "var(--red)", color: "#fff", padding: "1px 5px", borderRadius: 8, fontWeight: 900 }}>
+                      {convergenceAlerts.length}
+                    </span>
+                  )}
+                  <span style={{ fontSize: 9, opacity: 0.8 }}>{showConvergenceMonitor ? "▲" : "▼"}</span>
                 </button>
 
                 <div style={{ width: 1, height: 16, background: "rgba(245, 200, 76, 0.25)" }} />

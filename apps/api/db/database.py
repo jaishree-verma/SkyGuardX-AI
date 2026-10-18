@@ -19,7 +19,8 @@ logger = logging.getLogger("SkyGuard-X.db")
 settings = get_settings()
 
 try:
-    engine = create_engine(settings.database_url, pool_pre_ping=True)
+    connect_args = {"connect_timeout": 1} if "postgresql" in settings.database_url else {}
+    engine = create_engine(settings.database_url, pool_pre_ping=True, connect_args=connect_args)
     with engine.connect():
         pass
     logger.info("connected to %s", settings.database_url)

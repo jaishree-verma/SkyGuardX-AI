@@ -18,6 +18,10 @@ export function useNexusSocket() {
     conjunctions: {},
     alerts: [],
     convergenceAlerts: [],
+    impact: null,
+    cascade: null,
+    scenarioResults: null,
+    recommendations: [],
   });
   const wsRef = useRef(null);
   const attemptRef = useRef(0);
@@ -103,6 +107,54 @@ export function useNexusSocket() {
                       (a) => a.convergence_id !== ca.convergence_id
                     ),
                   ].slice(0, 10),
+                };
+              }
+              case "convergence_dismissed": {
+                const dismissedId = msg.payload?.convergence_id;
+                return {
+                  ...prev,
+                  convergenceAlerts: prev.convergenceAlerts.filter(
+                    (a) => a.convergence_id !== dismissedId
+                  ),
+                };
+              }
+              case "impact": {
+                return {
+                  ...prev,
+                  impact: msg.payload,
+                };
+              }
+              case "cascade": {
+                return {
+                  ...prev,
+                  cascade: msg.payload,
+                };
+              }
+              case "scenario_results": {
+                return {
+                  ...prev,
+                  scenarioResults: msg.payload,
+                };
+              }
+              case "recommendation": {
+                const rec = msg.payload;
+                return {
+                  ...prev,
+                  recommendations: [
+                    rec,
+                    ...prev.recommendations.filter(
+                      (r) => r.recommendation_id !== rec.recommendation_id
+                    ),
+                  ].slice(0, 20),
+                };
+              }
+              case "recommendation_decided": {
+                const updated = msg.payload;
+                return {
+                  ...prev,
+                  recommendations: prev.recommendations.map((r) =>
+                    r.recommendation_id === updated.recommendation_id ? updated : r
+                  ),
                 };
               }
               default:

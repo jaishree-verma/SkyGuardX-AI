@@ -223,3 +223,19 @@ class SpaceSimulator:
                 },
             )
             await self.gateway.ingest(deb_event)
+
+        # 3. Periodically emit Earth Hazard update (every ~20s, or during demo scenario)
+        if self._tick == 1 or self._tick % 8 == 0 or (demo_active and demo_step in (2, 4)):
+            hazard_event = CanonicalEvent(
+                event_type=EventType.EARTH_HAZARD_WILDFIRE,
+                source="simulator",
+                entity_id="HAZARD-77",
+                event_time=datetime.now(timezone.utc),
+                quality=DataQuality(status="GOOD", latency_ms=round(_rng.uniform(150, 400), 1)),
+                payload={"hazard_id": "HAZARD-77", "_simulated": True},
+            )
+            try:
+                await self.gateway.ingest(hazard_event)
+            except Exception as exc:
+                logger.debug("hazard event ingest skipped: %s", exc)
+

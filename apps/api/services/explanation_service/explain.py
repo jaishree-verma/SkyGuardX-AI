@@ -227,7 +227,7 @@ def generate_explanation(evidence: dict) -> dict:
     """
     settings = get_settings()
 
-    if not settings.gemini_api_key:
+    if not settings.gemini_api_key or not settings.gemini_api_key.startswith("AIzaSy"):
         sections = _deterministic_fallback(evidence)
         return {"sections": sections, "mode": "template", "model": None}
 
@@ -274,7 +274,7 @@ def generate_convergence_explanation(evidence: dict) -> dict:
         "compound nature of the risk and the urgency of human review."
     )
 
-    if not settings.gemini_api_key:
+    if not settings.gemini_api_key or not settings.gemini_api_key.startswith("AIzaSy"):
         sections = _deterministic_convergence_fallback(evidence)
         return {"sections": sections, "mode": "template", "model": None, "is_convergence": True}
 

@@ -761,6 +761,32 @@ async def approve_recommendation(recommendation_id: str, req: ApprovalRequest):
     return rec
 
 
+@app.get("/api/v1/recommendations")
+async def list_recommendations():
+    """Returns all generated AI recommendations (newest first)."""
+    return list(reversed(list(RECOMMENDATIONS.values())))
+
+
+@app.get("/api/v1/audit")
+async def list_audit(limit: int = 50):
+    """Returns recent audit records across all recommendations and actions."""
+    try:
+        with SessionLocal() as db:
+            rows = db.query(AuditRecord).order_by(AuditRecord.timestamp.desc()).limit(limit).all()
+            return [
+                {
+                    "actor": r.actor,
+                    "recommendation_id": r.recommendation_id,
+                    "timestamp": r.timestamp.isoformat(),
+                    "event": r.event,
+                }
+                for r in rows
+            ]
+    except Exception as exc:
+        logger.warning("audit query failed: %s", exc)
+        return []
+
+
 @app.get("/api/v1/audit/{recommendation_id}")
 async def audit(recommendation_id: str):
     try:
